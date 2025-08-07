@@ -3,12 +3,25 @@ import "./Homepage.css";
 import { useTheme } from "../contexts/ThemeContext";
 
 const Homepage = () => {
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, showLoader, hideLoader } = useTheme();
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     stream: "",
   });
+
+  useEffect(() => {
+    // Only show loader if not already loading globally
+    if (!document.querySelector('.loader-overlay')) {
+      showLoader("Loading Homepage...", "homepage");
+      
+      const timer = setTimeout(() => {
+        hideLoader("homepage");
+      }, 600);
+      
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const streamOptions = ["Non-Medical", "Medical", "Commerce", "Arts", "Other"];
 
@@ -27,8 +40,14 @@ const Homepage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (formData.name && formData.stream) {
-      console.log("Form submitted:", formData);
-      // Handle form submission here
+      showLoader("Processing your request...", "form-submit");
+      
+      // Simulate processing
+      setTimeout(() => {
+        console.log("Form submitted:", formData);
+        hideLoader("form-submit");
+        // Handle form submission here
+      }, 2000);
     }
   };
   useEffect(() => {

@@ -3,18 +3,52 @@ import "./Footer.css";
 import { useTheme } from "../contexts/ThemeContext";
 
 const Footer = () => {
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, showLoader, hideLoader } = useTheme();
 
   useEffect(() => {
     // Load the Spline viewer script if not already loaded
     if (!document.querySelector('script[src*="splinetool"]')) {
+      showLoader("Loading 3D background...", "spline-script");
+      
       const script = document.createElement("script");
       script.type = "module";
       script.src =
         "https://unpkg.com/@splinetool/viewer@1.10.42/build/spline-viewer.js";
+      
+      script.onload = () => {
+        setTimeout(() => {
+          hideLoader("spline-script");
+        }, 800);
+      };
+      
+      script.onerror = () => {
+        hideLoader("spline-script");
+      };
+      
       document.head.appendChild(script);
     }
-  }, []);
+  }, [showLoader, hideLoader]);
+
+  // Show loader when theme changes and Spline scene needs to reload - but only briefly
+  useEffect(() => {
+    let mounted = true;
+    
+    const timer = setTimeout(() => {
+      if (mounted) {
+        showLoader("Updating background...", "spline-theme");
+        setTimeout(() => {
+          if (mounted) {
+            hideLoader("spline-theme");
+          }
+        }, 800);
+      }
+    }, 100);
+
+    return () => {
+      mounted = false;
+      clearTimeout(timer);
+    };
+  }, [isDarkMode]);
 
   return (
     <footer className="footer">

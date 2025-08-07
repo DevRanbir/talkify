@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Contact.css";
 import { useTheme } from "../contexts/ThemeContext";
 
 const Contact = () => {
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, showLoader, hideLoader } = useTheme();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -14,6 +14,19 @@ const Contact = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState("");
+
+  useEffect(() => {
+    // Only show loader if not already loading globally
+    if (!document.querySelector('.loader-overlay')) {
+      showLoader("Loading Contact Page...", "contact-page");
+      
+      const timer = setTimeout(() => {
+        hideLoader("contact-page");
+      }, 600);
+      
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const inquiryTypes = [
     { value: "general", label: "General Inquiry" },
@@ -34,11 +47,13 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    showLoader("Sending your message...", "contact-form");
     
     // Simulate form submission
     setTimeout(() => {
       setSubmitStatus("success");
       setIsSubmitting(false);
+      hideLoader("contact-form");
       setFormData({
         name: "",
         email: "",

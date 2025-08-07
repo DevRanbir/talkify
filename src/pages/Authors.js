@@ -1,9 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./Authors.css";
 import { useTheme } from "../contexts/ThemeContext";
 
 const Authors = () => {
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, showLoader, hideLoader } = useTheme();
+
+  useEffect(() => {
+    // Only show loader if not already loading globally
+    if (!document.querySelector('.loader-overlay')) {
+      showLoader("Loading Authors Page...", "authors-page");
+      
+      const timer = setTimeout(() => {
+        hideLoader("authors-page");
+      }, 600);
+      
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const authors = [
     {

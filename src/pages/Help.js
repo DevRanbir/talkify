@@ -1,9 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./Help.css";
 import { useTheme } from "../contexts/ThemeContext";
 
 const Help = () => {
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, showLoader, hideLoader } = useTheme();
+
+  useEffect(() => {
+    // Only show loader if not already loading globally
+    if (!document.querySelector('.loader-overlay')) {
+      showLoader("Loading Help Page...", "help-page");
+      
+      const timer = setTimeout(() => {
+        hideLoader("help-page");
+      }, 600);
+      
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   return (
     <div className="help-page">
