@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Homepage.css";
 import { useTheme } from "../contexts/ThemeContext";
 
 const Homepage = () => {
   const { isDarkMode, showLoader, hideLoader } = useTheme();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -29,6 +31,14 @@ const Homepage = () => {
     setShowForm(true);
   };
 
+  const handleLearnMore = () => {
+    showLoader("Loading Help Page...", "learn-more");
+    setTimeout(() => {
+      navigate("/help");
+      hideLoader("learn-more");
+    }, 500);
+  };
+
   const handleStreamSelect = (stream) => {
     setFormData((prev) => ({ ...prev, stream }));
   };
@@ -42,11 +52,17 @@ const Homepage = () => {
     if (formData.name && formData.stream) {
       showLoader("Processing your request...", "form-submit");
       
-      // Simulate processing
+      // Create user-specific URL
+      const userName = formData.name.toLowerCase().replace(/\s+/g, '-');
+      
+      // Store user data in sessionStorage for the explore page
+      sessionStorage.setItem('userData', JSON.stringify(formData));
+      
+      // Simulate processing and redirect
       setTimeout(() => {
         console.log("Form submitted:", formData);
         hideLoader("form-submit");
-        // Handle form submission here
+        navigate(`/explore/${userName}`);
       }, 2000);
     }
   };
@@ -89,7 +105,7 @@ const Homepage = () => {
             <button className="btn btn-primary" onClick={handleGetStarted}>
               Get Started
             </button>
-            <button className="btn btn-secondary">Learn More</button>
+            <button className="btn btn-secondary" onClick={handleLearnMore}>Learn More</button>
           </div>
         </div>
 

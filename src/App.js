@@ -8,6 +8,7 @@ import Homepage from "./pages/Homepage";
 import Help from "./pages/Help";
 import Authors from "./pages/Authors";
 import Contact from "./pages/Contact";
+import Explore from "./pages/Explore";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 
 // Component to handle route changes and loading
@@ -16,8 +17,8 @@ const AppContent = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Only show route loader if not already loading and not initial load
-    if (!isLoading) {
+    // Only show route loader if not already loading, not initial load, and not explore page
+    if (!isLoading && !location.pathname.includes("/explore")) {
       showLoader("Loading page...", "route-change");
       
       const timer = setTimeout(() => {
@@ -82,16 +83,49 @@ const AppContent = () => {
   return (
     <div className="App">
       <Loader isVisible={isLoading} text={loadingText} />
-      <Navbar />
-      <main>
-        <Routes>
-          <Route path="/" element={<Homepage />} />
-          <Route path="/help" element={<Help />} />
-          <Route path="/authors" element={<Authors />} />
-          <Route path="/contact" element={<Contact />} />
-        </Routes>
-      </main>
-      <Footer />
+      <Routes>
+        {/* Explore page routes - full screen without navbar/footer */}
+        <Route path="/explore" element={<Explore />} />
+        <Route path="/explore/:userName" element={<Explore />} />
+        
+        {/* Regular pages with navbar/footer */}
+        <Route path="/" element={
+          <>
+            <Navbar />
+            <main>
+              <Homepage />
+            </main>
+            <Footer />
+          </>
+        } />
+        <Route path="/help" element={
+          <>
+            <Navbar />
+            <main>
+              <Help />
+            </main>
+            <Footer />
+          </>
+        } />
+        <Route path="/authors" element={
+          <>
+            <Navbar />
+            <main>
+              <Authors />
+            </main>
+            <Footer />
+          </>
+        } />
+        <Route path="/contact" element={
+          <>
+            <Navbar />
+            <main>
+              <Contact />
+            </main>
+            <Footer />
+          </>
+        } />
+      </Routes>
     </div>
   );
 };
