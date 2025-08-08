@@ -12,18 +12,7 @@ const Homepage = () => {
     stream: "",
   });
 
-  useEffect(() => {
-    // Only show loader if not already loading globally
-    if (!document.querySelector('.loader-overlay')) {
-      showLoader("Loading Homepage...", "homepage");
-      
-      const timer = setTimeout(() => {
-        hideLoader("homepage");
-      }, 600);
-      
-      return () => clearTimeout(timer);
-    }
-  }, []);
+  // Remove the conflicting useEffect that was causing loader issues
 
   const streamOptions = ["Non-Medical", "Medical", "Commerce", "Arts", "Other"];
 

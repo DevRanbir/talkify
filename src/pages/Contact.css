@@ -150,6 +150,8 @@
   color: var(--text-primary);
   transition: all 0.3s ease;
   border: 1px solid var(--border-color);
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .social-link:hover {

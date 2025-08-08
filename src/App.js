@@ -17,68 +17,25 @@ const AppContent = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Only show route loader if not already loading, not initial load, and not explore page
-    if (!isLoading && !location.pathname.includes("/explore")) {
+    // Simple route change loader - only for navigation between pages
+    if (!location.pathname.includes("/explore")) {
       showLoader("Loading page...", "route-change");
       
       const timer = setTimeout(() => {
         hideLoader("route-change");
-      }, 800);
+      }, 500);
       
       return () => clearTimeout(timer);
     }
-  }, [location.pathname]);
+  }, [location.pathname, showLoader, hideLoader]);
 
   useEffect(() => {
-    // Handle page refresh detection - only for actual refreshes
-    let isRefreshing = false;
-    
-    const handleBeforeUnload = () => {
-      isRefreshing = true;
-      sessionStorage.setItem("isRefreshing", "true");
-    };
-
-    // Handle visibility change (tab switching) - less aggressive
-    const handleVisibilityChange = () => {
-      if (!document.hidden && !isRefreshing && !isLoading) {
-        showLoader("Welcome back!", "visibility-change");
-        setTimeout(() => {
-          hideLoader("visibility-change");
-        }, 500);
-      }
-    };
-
-    // Handle online/offline status
-    const handleOnline = () => {
-      if (!isLoading) {
-        showLoader("Connection restored!", "online-status");
-        setTimeout(() => {
-          hideLoader("online-status");
-        }, 1000);
-      }
-    };
-
-    const handleOffline = () => {
-      if (!isLoading) {
-        showLoader("Connection lost...", "offline-status");
-        setTimeout(() => {
-          hideLoader("offline-status");
-        }, 1500);
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-    
+    // Simple cleanup on component mount
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
+      // Cleanup any remaining loaders on unmount
+      hideLoader("route-change");
     };
-  }, [showLoader, hideLoader, isLoading]);
+  }, [hideLoader]);
 
   return (
     <div className="App">

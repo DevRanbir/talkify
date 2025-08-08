@@ -3,7 +3,7 @@ import "./Help.css";
 import { useTheme } from "../contexts/ThemeContext";
 
 const Help = () => {
-  const { isDarkMode, showLoader, hideLoader } = useTheme();
+  const { showLoader, hideLoader } = useTheme();
 
   useEffect(() => {
     // Only show loader if not already loading globally
@@ -16,7 +16,7 @@ const Help = () => {
       
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [showLoader, hideLoader]);
 
   return (
     <div className="help-page">

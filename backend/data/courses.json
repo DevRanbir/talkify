@@ -1,0 +1,128 @@
+[
+  {
+    "name": "B.E. Aerospace Engineering",
+    "link": "https://www.cuchd.in/engineering/be-aerospace.php",
+    "tags": ["aerospace", "engineering", "physics", "mechanics"],
+    "description": "Focuses on design, development, and testing of aircraft and spacecraft systems.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "B.E. Automobile Engineering",
+    "link": "https://www.cuchd.in/engineering/be-automobile-engineering.php",
+    "tags": ["automobile", "mechanical", "vehicles", "engineering"],
+    "description": "Covers vehicle engineering including design, manufacturing, and operation of automobiles.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "B.E. BioTechnology Engineering",
+    "link": "https://www.cuchd.in/engineering/be-biotechnology.php",
+    "tags": ["biotechnology", "engineering", "biology", "genetics"],
+    "description": "Applies biology and technology in medical, agricultural, and environmental fields.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "B.E. Chemical Engineering",
+    "link": "https://www.cuchd.in/engineering/be-chemical-engineering.php",
+    "tags": ["chemical", "engineering", "chemistry", "process"],
+    "description": "Deals with design and operation of chemical processes and industrial plants.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "B.E. Civil Engineering",
+    "link": "https://www.cuchd.in/engineering/be-civil-engineering.php",
+    "tags": ["civil", "construction", "infrastructure", "engineering"],
+    "description": "Focuses on construction, design, and maintenance of the built environment.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "B.E. Computer Science & Engineering",
+    "link": "https://www.cuchd.in/engineering/be-computer-science-engineering.php",
+    "tags": ["computer science", "software", "programming", "IT"],
+    "description": "Core computer science program covering software, algorithms, and systems.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "B.E. Electrical Engineering",
+    "link": "https://www.cuchd.in/engineering/be-electrical-engineering.php",
+    "tags": ["electrical", "power systems", "circuits", "engineering"],
+    "description": "Focuses on electrical systems, machines, and energy management.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Bachelor of Engineering (Hons.) Computer Science & Engineering (Artificial Intelligence) in Collaboration with Microsoft",
+    "link": "https://www.cuchd.in/engineering/be-cse-artificial-intelligence.php",
+    "tags": ["AI", "computer science", "microsoft", "machine learning"],
+    "description": "Specialized program in AI and ML in collaboration with Microsoft.",
+    "provider": "Chandigarh University with Microsoft",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "B.E. Electronics and Communication Engineering",
+    "link": "https://www.cuchd.in/engineering/be-electronics-communication-engineering.php",
+    "tags": ["electronics", "communication", "engineering", "circuit design"],
+    "description": "Combines electronics with telecommunication systems and embedded devices.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "B.E. Information Technology Engineering",
+    "link": "https://www.cuchd.in/engineering/be-information-technology.php",
+    "tags": ["IT", "software", "networking", "security"],
+    "description": "Focuses on managing and processing information using computing technologies.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "B.E. Mechanical Engineering",
+    "link": "https://www.cuchd.in/engineering/be-mechanical-engineering.php",
+    "tags": ["mechanical", "design", "manufacturing", "thermal"],
+    "description": "Deals with machines, engines, robotics, and thermal systems.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "B.E. Mechatronics Engineering",
+    "link": "https://www.cuchd.in/engineering/be-mechatronics.php",
+    "tags": ["mechatronics", "robotics", "automation", "engineering"],
+    "description": "Integrates mechanical, electronics, computer, and control engineering.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "B.E. Food Technology Engineering",
+    "link": "https://www.cuchd.in/engineering/be-food-technology.php",
+    "tags": ["food technology", "engineering", "processing", "quality"],
+    "description": "Focuses on food processing, preservation, and safety systems.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Bachelor of Engineering (Computer Science and Engineering) (with Specialization in Full Stack Development)",
+    "link": "https://www.cuchd.in/engineering/be-cse-full-stack-development.php",
+    "tags": ["full stack", "web development", "frontend", "backend"],
+    "description": "Specialized track in computer science focused on full stack development.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  }
+]

@@ -23,22 +23,17 @@ export const ThemeProvider = ({ children }) => {
       setIsDarkMode(savedTheme === "dark");
     }
     
-    // Only show initial loading on fresh page load, not on refresh loops
-    const hasShownInitialLoader = sessionStorage.getItem("initialLoaderShown");
-    if (!hasShownInitialLoader) {
-      sessionStorage.setItem("initialLoaderShown", "true");
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 1200);
-      return () => clearTimeout(timer);
-    } else {
-      // Skip initial loader if already shown in this session
+    // Always hide initial loader after a short delay
+    const timer = setTimeout(() => {
       setIsLoading(false);
-    }
-  }, []);
+      setLoaderQueue([]); // Clear any queued loaders
+    }, 800);
+    
+    return () => clearTimeout(timer);
+  }, []); // Empty dependency array to run only once
 
   useEffect(() => {
-    // Apply theme to document
+    // Apply theme to document - separate effect to avoid circular updates
     if (isDarkMode) {
       document.documentElement.setAttribute("data-theme", "dark");
       localStorage.setItem("theme", "dark");
@@ -46,7 +41,7 @@ export const ThemeProvider = ({ children }) => {
       document.documentElement.setAttribute("data-theme", "light");
       localStorage.setItem("theme", "light");
     }
-  }, [isDarkMode]);
+  }, [isDarkMode]); // Only depend on isDarkMode
 
   const toggleTheme = () => {
     // Prevent multiple theme toggles while one is in progress
@@ -67,9 +62,10 @@ export const ThemeProvider = ({ children }) => {
 
   const showLoader = (text = "Loading...", id = "default") => {
     // Prevent duplicate loaders with same ID
-    if (loaderQueue.includes(id)) return;
-    
-    setLoaderQueue(prev => [...prev, id]);
+    setLoaderQueue(prev => {
+      if (prev.includes(id)) return prev; // Don't add duplicate
+      return [...prev, id];
+    });
     setLoadingText(text);
     setIsLoading(true);
   };
@@ -86,6 +82,13 @@ export const ThemeProvider = ({ children }) => {
     });
   };
 
+  // Force clear all loaders function for emergency cleanup
+  const clearAllLoaders = () => {
+    setIsLoading(false);
+    setLoaderQueue([]);
+    setLoadingText("Loading...");
+  };
+
   return (
     <ThemeContext.Provider value={{ 
       isDarkMode, 
@@ -93,7 +96,8 @@ export const ThemeProvider = ({ children }) => {
       isLoading, 
       loadingText,
       showLoader,
-      hideLoader 
+      hideLoader,
+      clearAllLoaders
     }}>
       {children}
     </ThemeContext.Provider>

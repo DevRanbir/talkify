@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Backend API Test</title>
+</head>
+<body>
+    <h1>Talkify Backend API Test</h1>
+    
+    <div>
+        <h2>Health Check</h2>
+        <button onclick="testHealth()">Test Health</button>
+        <div id="health-result"></div>
+    </div>
+    
+    <div>
+        <h2>Next Question API</h2>
+        <button onclick="testNextQuestion()">Test Next Question</button>
+        <div id="question-result"></div>
+    </div>
+    
+    <div>
+        <h2>API Documentation</h2>
+        <button onclick="openDocs()">Open API Docs</button>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        
+        async function testHealth() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                resultDiv.innerHTML = `<pre style="background: #e8f5e8; padding: 10px;">${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<pre style="background: #f5e8e8; padding: 10px;">Error: ${error.message}</pre>`;
+            }
+        }
+        
+        async function testNextQuestion() {
+            const resultDiv = document.getElementById('question-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/next-question`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        conversation_history: [],
+                        user_id: 'test_user'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `<pre style="background: #e8f5e8; padding: 10px;">${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<pre style="background: #f5e8e8; padding: 10px;">Error: ${error.message}</pre>`;
+            }
+        }
+        
+        function openDocs() {
+            window.open(`${API_BASE}/docs`, '_blank');
+        }
+    </script>
+</body>
+</html>

@@ -1,588 +1,900 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import "./Explore.css";
 import { useTheme } from "../contexts/ThemeContext";
-import Groq from 'groq-sdk';
-import CareerRecommendationService from "../services/CareerRecommendationService";
+import { useQuizManager } from "../hooks/useQuizManager";
+import TalkifyAPI from "../services/TalkifyAPI";
+import voiceChatService from "../services/VoiceChatService";
 
 const Explore = () => {
-  const { isDarkMode, showLoader, hideLoader } = useTheme();
-  const { userName: urlUserName } = useParams();
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [userName, setUserName] = useState("");
-  const [userStream, setUserStream] = useState("");
-  const [currentOptions, setCurrentOptions] = useState([]);
-  const [conversationStage, setConversationStage] = useState("welcome");
-  const [userInteracted, setUserInteracted] = useState(false);
-  const [showStartButton, setShowStartButton] = useState(true);
-  const [careerService, setCareerService] = useState(null);
-  const [userProfile, setUserProfile] = useState({});
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [currentRecommendations, setCurrentRecommendations] = useState([]);
-  const [enable3D, setEnable3D] = useState(true);
-  const [isTyping, setIsTyping] = useState(false);
-  const audioRef = useRef(null);
-  const chatEndRef = useRef(null);
+  const { userName } = useParams();
+  const navigate = useNavigate();
+  const { isDarkMode, showLoader, hideLoader, toggleTheme } = useTheme();
+  const [userData, setUserData] = useState(null);
+  const [showExitWarning, setShowExitWarning] = useState(false);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [isChatExpanded, setIsChatExpanded] = useState(false);
+  const [localChatMessages, setLocalChatMessages] = useState([]);
+  const [chatSessionId, setChatSessionId] = useState(null);
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [chatError, setChatError] = useState(null);
+  const [voiceSettings, setVoiceSettings] = useState(voiceChatService.getVoiceSettings());
+  const chatMessagesRef = useRef(null);
+  
+  // Use the quiz manager hook
+  const {
+    isLoading,
+    error,
+    chatMessages,
+    actionButtons,
+    isQuizActive,
+    isQuizComplete,
+    progress,
+    showcaseData,
+    submitAnswer,
+    startCareerGuidance,
+    resetQuiz
+  } = useQuizManager();
 
-  // Initialize Groq client
-  const groq = new Groq({
-    apiKey: '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',
-    dangerouslyAllowBrowser: true
-  });
+  // Initial action buttons for non-quiz interactions
+  const [defaultActionButtons] = useState([
+    { id: 1, label: "Career Guidance MAX", icon: "🎯", action: "career" },
+    { id: 2, label: "Chat and Get Guided", icon: "💬", action: "chat" }
+  ]);
+
+  // Dynamic steps based on quiz progress
+  const [steps, setSteps] = useState([
+    { id: 1, label: "Welcome", status: "completed" },
+    { id: 2, label: "Interests", status: "pending" },
+    { id: 3, label: "Skills", status: "pending" },
+    { id: 4, label: "Preferences", status: "pending" },
+    { id: 5, label: "Analysis", status: "pending" },
+    { id: 6, label: "Results", status: "pending" }
+  ]);
 
   useEffect(() => {
-    // Load 3D preference from localStorage
-    const saved3DPreference = localStorage.getItem('enable3D');
-    if (saved3DPreference !== null) {
-      setEnable3D(saved3DPreference === 'true');
+    // Load user data from session storage
+    const storedUserData = sessionStorage.getItem('userData');
+    if (storedUserData) {
+      setUserData(JSON.parse(storedUserData));
+    } else if (userName) {
+      // If no stored data but userName exists, create basic user data
+      setUserData({ name: userName.replace(/-/g, ' '), stream: 'Unknown' });
     }
 
-    // Initialize career recommendation service
-    const initCareerService = async () => {
-      const service = new CareerRecommendationService();
-      await service.loadCourses();
-      setCareerService(service);
+    // Load the Spline viewer script for the main area
+    const script = document.createElement("script");
+    script.type = "module";
+    script.src = "https://unpkg.com/@splinetool/viewer@1.10.42/build/spline-viewer.js";
+    document.head.appendChild(script);
+
+    return () => {
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
     };
-    
-    initCareerService();
+  }, [userName]);
 
-    // Load user data from sessionStorage if coming from homepage
-    const userData = sessionStorage.getItem('userData');
-    if (userData) {
-      const parsedData = JSON.parse(userData);
-      setUserName(parsedData.name);
-      setUserStream(parsedData.stream);
-      setUserProfile({ previousStream: parsedData.stream });
-      setConversationStage("welcome");
-      // Clear the data after using it
-      sessionStorage.removeItem('userData');
-    } else if (urlUserName) {
-      // If no userData but has URL parameter, extract name from URL
-      const nameFromUrl = urlUserName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-      setUserName(nameFromUrl);
-      setConversationStage("welcome");
-    }
-
-    // Check if this is an initial load (not a refresh or reactivation)
-    const isInitialLoad = !sessionStorage.getItem('explorePageVisited');
-    
-    // Only show loader on true initial load
-    if (isInitialLoad && !document.querySelector('.loader-overlay')) {
-      showLoader("Loading Career Guidance...", "explore-page");
-      
-      // Mark that the page has been visited
-      sessionStorage.setItem('explorePageVisited', 'true');
-      
-      const timer = setTimeout(() => {
-        hideLoader("explore-page");
-      }, 600);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [urlUserName]);
-
+  // Update steps based on quiz progress
   useEffect(() => {
-    // Load the Spline viewer script if not already loaded and 3D is enabled
-    if (enable3D && !document.querySelector('script[src*="splinetool"]')) {
-      const script = document.createElement("script");
-      script.type = "module";
-      script.src =
-        "https://unpkg.com/@splinetool/viewer@1.10.42/build/spline-viewer.js";
-      
-      script.onload = () => {
-        // Script loaded successfully
-      };
-      
-      script.onerror = () => {
-        // Handle script loading error
-      };
-      
-      document.head.appendChild(script);
-    }
-  }, [enable3D]);
-
-  // Auto-scroll to bottom of chat
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages]);
-
-  // Toggle 3D function
-  const toggle3D = () => {
-    const newState = !enable3D;
-    setEnable3D(newState);
-    localStorage.setItem('enable3D', newState.toString());
-  };
-
-  // Typing animation effect
-  const typeMessage = (message, callback) => {
-    setIsTyping(true);
-    let currentMessage = "";
-    let index = 0;
-    
-    const typeInterval = setInterval(() => {
-      if (index < message.length) {
-        currentMessage += message[index];
-        setChatMessages(prev => {
-          const newMessages = [...prev];
-          if (newMessages.length > 0 && !newMessages[newMessages.length - 1].isUser) {
-            newMessages[newMessages.length - 1].text = currentMessage;
+    if (isQuizActive || isQuizComplete) {
+      setSteps(prevSteps => 
+        prevSteps.map((step, index) => {
+          if (index + 1 < progress.currentStep) {
+            return { ...step, status: "completed" };
+          } else if (index + 1 === progress.currentStep) {
+            return { ...step, status: "active" };
+          } else {
+            return { ...step, status: "pending" };
           }
-          return newMessages;
-        });
-        index++;
-      } else {
-        clearInterval(typeInterval);
-        setIsTyping(false);
-        if (callback) callback();
-      }
-    }, 30);
-  };
-
-  // Add message to chat with typing effect
-  const addMessage = (message, isUser = false, useTyping = false) => {
-    const newMessage = {
-      id: Date.now(),
-      text: isUser || !useTyping ? message : "",
-      isUser,
-      timestamp: new Date()
-    };
-    
-    setChatMessages(prev => [...prev, newMessage]);
-    
-    if (!isUser && useTyping) {
-      setTimeout(() => {
-        typeMessage(message, () => {
-          // Message typing completed
-        });
-      }, 100);
+        })
+      );
     }
-  };
+  }, [progress, isQuizActive, isQuizComplete]);
 
-  // Text-to-Speech function using Groq
-  const speakText = async (text) => {
-    try {
-      setIsSpeaking(true);
+  // Auto-scroll chat messages when new messages are added
+  useEffect(() => {
+    if (chatMessagesRef.current && localChatMessages.length > 0) {
+      chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+    }
+  }, [localChatMessages]);
+
+  // Update voice settings periodically to reflect speaking status
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVoiceSettings(voiceChatService.getVoiceSettings());
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleActionClick = async (action) => {
+    console.log('🎬 Action clicked:', action, 'Loading state:', isLoading);
+    if (isLoading) return;
+
+    if (action === "career") {
+      // Start the AI-powered career guidance quiz
+      setIsChatExpanded(false); // Collapse chat when starting career guidance
+      console.log('🎯 Starting career guidance for:', userData?.name || userName || "User");
+      showLoader("Initializing AI Career Assistant...", "career");
+      try {
+        await startCareerGuidance(userData?.name || userName || "User");
+        hideLoader("career");
+        console.log('✅ Career guidance started successfully');
+      } catch (error) {
+        hideLoader("career");
+        console.error("❌ Failed to start career guidance:", error);
+      }
+    } else if (action === "chat") {
+      // Handle chat and get guided action
+      setIsChatExpanded(true);
+      setIsChatLoading(true);
+      setChatError(null);
+      showLoader("Starting guided chat session...", "chat");
       
-      const response = await groq.audio.speech.create({
-        model: "playai-tts",
-        voice: "Calum-PlayAI",
-        input: text,
-        response_format: "wav"
-      });
-      
-      const buffer = await response.arrayBuffer();
-      const blob = new Blob([buffer], { type: 'audio/wav' });
-      const audioUrl = URL.createObjectURL(blob);
-      
-      if (audioRef.current) {
-        audioRef.current.src = audioUrl;
-        audioRef.current.play();
-        
-        audioRef.current.onended = () => {
-          setIsSpeaking(false);
-          URL.revokeObjectURL(audioUrl);
+      try {
+        // Initialize chat session with a welcome message
+        const welcomeMessage = {
+          id: Date.now(),
+          text: `Hello ${userData?.name || userName || "there"}! 👋 I'm your personal guidance assistant. I'm here to help you with career planning, study strategies, and skill development. What would you like to explore today?`,
+          sender: 'bot',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
+        
+        setLocalChatMessages([welcomeMessage]);
+        hideLoader("chat");
+        setIsChatLoading(false);
+        console.log('✅ Chat and Get Guided mode activated');
+      } catch (error) {
+        hideLoader("chat");
+        setIsChatLoading(false);
+        setChatError('Failed to initialize chat. Please try again.');
+        console.error('❌ Failed to initialize chat:', error);
       }
-    } catch (error) {
-      console.error('Error with text-to-speech:', error);
-      setIsSpeaking(false);
+    } else {
+      // Handle other actions (study, skills, interview, insights)
+      showLoader(`Preparing ${action} module...`, action);
+      setTimeout(() => {
+        // Show coming soon message for other features
+        console.log(`${action.charAt(0).toUpperCase() + action.slice(1)} module is coming soon!`);
+        // Note: We'll handle this through the quiz manager in the future
+        hideLoader(action);
+      }, 1500);
     }
   };
 
-  // Handle start button click
-  const handleStartConversation = async () => {
-    setUserInteracted(true);
-    setShowStartButton(false);
-    await startConversation();
+  const handleButtonClick = async (buttonAction) => {
+    if (isQuizActive && !isLoading) {
+      // This is a quiz answer button
+      await submitAnswer(buttonAction);
+    } else {
+      // This is a regular action button
+      await handleActionClick(buttonAction);
+    }
   };
 
-  // Handle option selection
-  const handleOptionSelect = async (option) => {
-    if (!careerService || isProcessing) return;
-    
-    setIsProcessing(true);
-    setUserInteracted(true);
-    
-    // Add user message
-    addMessage(option, true);
-    
-    try {
-      // Get AI-powered recommendation
-      const response = await careerService.getRecommendation(
-        option, 
-        conversationStage, 
-        { ...userProfile, previousStream: userStream }
+  const handleStepClick = (stepId) => {
+    // Only allow clicking previous steps or current step
+    if (stepId <= progress.currentStep) {
+      // Update step status when clicked
+      setSteps(prevSteps => 
+        prevSteps.map(step => {
+          if (step.id === stepId) {
+            return { ...step, status: "active" };
+          } else if (step.id < stepId) {
+            return { ...step, status: "completed" };
+          } else {
+            return { ...step, status: "pending" };
+          }
+        })
       );
       
-      // Update conversation state
-      setConversationStage(response.nextStage || conversationStage);
-      
-      // Update user profile if needed
-      if (response.profileUpdate) {
-        setUserProfile(prev => ({ ...prev, ...response.profileUpdate }));
-      }
-      
-      // Add AI response with typing effect
+      showLoader(`Loading step ${stepId}...`, `step-${stepId}`);
       setTimeout(() => {
-        let messageText = response.message;
-        
-        // If there are course recommendations, format them nicely
-        if (response.recommendations && response.recommendations.length > 0) {
-          messageText += "\n\nHere are my top recommendations for you:\n\n";
-          response.recommendations.forEach((rec, index) => {
-            messageText += `${index + 1}. ${rec.name}\n${rec.reason}\n\n`;
-          });
-        }
-        
-        addMessage(messageText, false, true);
-        setCurrentOptions(response.options || []);
-        
-        // Store recommendations for potential display
-        if (response.recommendations) {
-          setCurrentRecommendations(response.recommendations);
-        }
-        
-        // Speak after typing is complete
-        setTimeout(() => {
-          speakText(response.message);
-        }, messageText.length * 30 + 500);
-        
-        setIsProcessing(false);
-      }, 800);
-      
-    } catch (error) {
-      console.error('Error getting career recommendation:', error);
-      
-      // Fallback response
-      setTimeout(() => {
-        const fallbackMessage = "I'm having trouble processing that right now. Let me help you explore some popular engineering options!";
-        addMessage(fallbackMessage, false, true);
-        setCurrentOptions([
-          "Tell me about Computer Science",
-          "What about Mechanical Engineering?",
-          "Show me all engineering options",
-          "Start over with my interests"
-        ]);
-        setTimeout(() => {
-          speakText(fallbackMessage);
-        }, fallbackMessage.length * 30 + 500);
-        setIsProcessing(false);
-      }, 800);
+        hideLoader(`step-${stepId}`);
+      }, 1000);
     }
   };
 
-  // Initialize conversation
-  const startConversation = async () => {
-    if (chatMessages.length === 0 && careerService) {
-      let welcomeMessage = "";
-      let initialOptions = [];
-
-      if (userName && userStream) {
-        // Personalized greeting for users coming from homepage
-        welcomeMessage = `Hello ${userName}! I see you've studied ${userStream}. I'm your AI career counselor and I'm excited to help you discover the perfect engineering career path at Chandigarh University!`;
-        
-        // Get AI-powered initial options
-        try {
-          const response = await careerService.getRecommendation(
-            `User ${userName} from ${userStream} background wants career guidance`,
-            "welcome",
-            { previousStream: userStream }
-          );
-          initialOptions = response.options || [
-            "Help me explore engineering options",
-            "I want to continue in my field",
-            "I'm interested in changing streams",
-            "Show me trending career paths"
-          ];
-        } catch (error) {
-          initialOptions = [
-            "Help me explore engineering options",
-            "I want to continue in my field", 
-            "I'm interested in changing streams",
-            "Show me trending career paths"
-          ];
-        }
-      } else if (userName) {
-        // User with name but no stream info
-        welcomeMessage = `Hello ${userName}! Welcome to Talkify's AI-powered career guidance. I'm here to help you discover the perfect engineering program at Chandigarh University!`;
-        initialOptions = [
-          "I love solving complex problems",
-          "I'm interested in technology and innovation",
-          "I want to build and create things", 
-          "I'm not sure yet, help me explore"
-        ];
-      } else {
-        // Default for users without data
-        welcomeMessage = "Hello! Welcome to Talkify's AI-powered career guidance. I'm here to help you discover the perfect engineering program at Chandigarh University!";
-        initialOptions = [
-          "I love solving complex problems",
-          "I'm interested in technology and innovation",
-          "I want to build and create things",
-          "I'm not sure yet, help me explore"
-        ];
-      }
-
-      addMessage(welcomeMessage, false, true);
-      setCurrentOptions(initialOptions);
-      
-      // Speak the welcome message after typing is complete
+  const handleSourceClick = () => {
+    if (showcaseData && showcaseData.link) {
+      showLoader("Opening course...", "source");
       setTimeout(() => {
-        speakText(welcomeMessage);
-      }, welcomeMessage.length * 30 + 800);
+        window.open(showcaseData.link, '_blank');
+        hideLoader("source");
+      }, 1000);
     }
+  };
+
+  const handleUtilityAction = (action) => {
+    switch (action) {
+      case 'voice':
+        setShowVoiceSettings(true);
+        break;
+      case 'reset':
+        showLoader("Resetting session...", "reset");
+        setTimeout(() => {
+          // Reset quiz and clear any session data
+          resetQuiz();
+          setIsChatExpanded(false); // Collapse chat on reset
+          console.log("Session reset successfully!");
+          hideLoader("reset");
+        }, 1000);
+        break;
+      case 'theme':
+        // Toggle theme using the theme context
+        toggleTheme();
+        console.log(`Switched to ${isDarkMode ? 'light' : 'dark'} mode!`);
+        break;
+      case 'exit':
+        setShowExitWarning(true);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleConfirmExit = () => {
+    setShowExitWarning(false);
+    showLoader("Returning to home...", "exit");
+    setTimeout(() => {
+      navigate('/');
+      hideLoader("exit");
+    }, 500);
+  };
+
+  const handleCancelExit = () => {
+    setShowExitWarning(false);
+  };
+
+  const handleCloseVoiceSettings = () => {
+    setShowVoiceSettings(false);
+  };
+
+  const handleCollapseChat = () => {
+    setIsChatExpanded(false);
+    setLocalChatMessages([]); // Clear local messages when collapsing
+    setChatSessionId(null); // Clear session ID
+    setChatError(null); // Clear any errors
+  };
+
+  const handleSendMessage = async (message) => {
+    if (!message.trim() || isChatLoading) return;
+    
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    // Add user message to local state immediately
+    const userMessage = {
+      id: Date.now(),
+      text: message,
+      sender: 'user',
+      timestamp: timestamp
+    };
+    
+    setLocalChatMessages(prev => [...prev, userMessage]);
+    setIsChatLoading(true);
+    setChatError(null);
+    
+    try {
+      // Send message to backend API
+      const response = await TalkifyAPI.sendChatMessage(
+        message, 
+        chatSessionId, 
+        userData?.name || userName || 'user'
+      );
+      
+      // Update session ID if this is the first message
+      if (!chatSessionId && response.sessionId) {
+        setChatSessionId(response.sessionId);
+      }
+      
+      // Add AI response to chat
+      const botMessage = {
+        id: Date.now() + 1,
+        text: response.response,
+        sender: 'bot',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      
+      setLocalChatMessages(prev => [...prev, botMessage]);
+      
+      // Speak the AI response
+      await voiceChatService.speakAIMessage(response.response);
+      
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      setChatError(error.message || 'Failed to send message. Please try again.');
+      
+      // Add error message to chat
+      const errorMessage = {
+        id: Date.now() + 1,
+        text: "Sorry, I'm having trouble responding right now. Please try again in a moment.",
+        sender: 'bot',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isError: true
+      };
+      
+      setLocalChatMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+
+  // Voice control functions
+  const toggleVoice = () => {
+    const newSettings = { ...voiceSettings, isVoiceEnabled: !voiceSettings.isVoiceEnabled };
+    setVoiceSettings(newSettings);
+    voiceChatService.setVoiceEnabled(newSettings.isVoiceEnabled);
+  };
+
+  const toggleAutoSpeak = () => {
+    const newSettings = { ...voiceSettings, autoSpeak: !voiceSettings.autoSpeak };
+    setVoiceSettings(newSettings);
+    voiceChatService.setAutoSpeak(newSettings.autoSpeak);
+  };
+
+  const stopSpeaking = () => {
+    voiceChatService.stopSpeaking();
   };
 
   return (
-    <div className={`explore-page ${!enable3D ? 'no-3d' : ''}`}>
-      {/* 3D Toggle Button */}
-      <button 
-        className="toggle-3d-btn"
-        onClick={toggle3D}
-        title={enable3D ? "Disable 3D Effects" : "Enable 3D Effects"}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {enable3D ? (
-            <path d="M12 2L2 7L12 12L22 7L12 2Z M2 17L12 22L22 17 M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          ) : (
-            <path d="M6 2L18 2 M6 6L18 6 M6 10L18 10 M6 14L18 14 M6 18L18 18 M6 22L18 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          )}
-        </svg>
-      </button>
-
-      {/* Conditional 3D Background */}
-      {enable3D && (
-        <>
-          {/* Show special background overlay only when AI is speaking */}
-          {isSpeaking && (
-            <div className="spline-background overlay">
-              <spline-viewer
-                url={"https://prod.spline.design/4sg93nDCzKSe-h-N/scene.splinecode"}
-              ></spline-viewer>
-            </div>
-          )}
-          
-          {/* Always visible background */}
-          <div className="spline-background">
-            <spline-viewer
-              url={"https://prod.spline.design/jmhMBw1w7fytoypD/scene.splinecode"}
-            ></spline-viewer>
-          </div>
-        </>
-      )}
-
-      {/* Fallback gradient background when 3D is disabled */}
-      {!enable3D && (
-        <div className="gradient-background">
-          <div className="gradient-orb orb-1"></div>
-          <div className="gradient-orb orb-2"></div>
-          <div className="gradient-orb orb-3"></div>
-        </div>
-      )}
-
-      {/* Main Content Container */}
+    <div className="explore-page">
       <div className="explore-container">
-        {/* Show Start Button if conversation hasn't started */}
-        {showStartButton ? (
-          <div className="start-container">
-            <div className="welcome-card">
-              <div className="welcome-icon">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9.5 7L14.5 12L9.5 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              
-              <h2>Career Discovery Hub</h2>
-              
-              <div className="welcome-subtitle">
-                {userName && userStream ? (
-                  <p>Welcome back, <span className="highlight">{userName}</span>! Ready to explore engineering careers after {userStream}?</p>
-                ) : userName ? (
-                  <p>Hello <span className="highlight">{userName}</span>! Let's discover your perfect engineering career path.</p>
-                ) : (
-                  <p>Welcome to AI-powered career guidance. Let's find your ideal engineering program.</p>
+        {/* Div 1 - Chat Box */}
+        <div className={`explore-div ${isChatExpanded ? 'div1-expanded' : 'div1'}`}>
+          <div className="chat-container">
+            <div className="chat-header">
+              <h3>Chat Assistant</h3>
+              <div className="chat-controls">
+                {/* Voice Controls */}
+                {voiceSettings.isAvailable && (
+                  <div className="voice-controls">
+                    <button 
+                      className={`voice-toggle-btn ${voiceSettings.isVoiceEnabled ? 'active' : ''}`}
+                      onClick={toggleVoice}
+                      title={voiceSettings.isVoiceEnabled ? "Disable Voice" : "Enable Voice"}
+                    >
+                      🔊
+                    </button>
+                    {voiceSettings.isVoiceEnabled && (
+                      <>
+                        <button 
+                          className={`auto-speak-btn ${voiceSettings.autoSpeak ? 'active' : ''}`}
+                          onClick={toggleAutoSpeak}
+                          title={voiceSettings.autoSpeak ? "Disable Auto-speak" : "Enable Auto-speak"}
+                        >
+                          🔄
+                        </button>
+                        {voiceChatService.isSpeaking() && (
+                          <button 
+                            className="stop-speaking-btn"
+                            onClick={stopSpeaking}
+                            title="Stop Speaking"
+                          >
+                            ⏹️
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+                {isChatExpanded && (
+                  <button 
+                    className="collapse-chat-button" 
+                    onClick={handleCollapseChat}
+                    title="Collapse Chat"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.3 5.71c-.39-.39-1.02-.39-1.41 0L12 10.59 7.11 5.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"/>
+                    </svg>
+                  </button>
                 )}
               </div>
-
-              <div className="start-features">
-                <div className="feature-item">
-                  <span className="feature-icon">🎯</span>
-                  <span>Personalized Recommendations</span>
+            </div>
+            <div className="chat-messages" ref={chatMessagesRef}>
+              {chatError && isChatExpanded && (
+                <div className="chat-error">
+                  <p>⚠️ {chatError}</p>
                 </div>
-                <div className="feature-item">
-                  <span className="feature-icon">🤖</span>
-                  <span>AI-Powered Guidance</span>
-                </div>
-                <div className="feature-item">
-                  <span className="feature-icon">🎤</span>
-                  <span>Voice Interactions</span>
-                </div>
-              </div>
-              
-              <button 
-                className="start-btn"
-                onClick={handleStartConversation}
-                disabled={!careerService}
-              >
-                <span className="btn-text">Start Career Discovery</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-
-              {!careerService && (
-                <div className="loading-notice">
-                  <div className="loading-dots">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                  </div>
-                  <p>Initializing AI system...</p>
+              )}
+              {(isChatExpanded ? localChatMessages : chatMessages).length > 0 ? (
+                <>
+                  {(isChatExpanded ? localChatMessages : chatMessages).map((message) => (
+                    <div
+                      key={message.id}
+                      className={`message ${message.sender === 'user' ? 'user-message' : 'bot-message'} ${message.isError ? 'error-message' : ''}`}
+                    >
+                      <div className="message-content">
+                        <p>{message.text}</p>
+                        <span className="message-time">{message.timestamp}</span>
+                      </div>
+                    </div>
+                  ))}
+                  {isChatLoading && isChatExpanded && (
+                    <div className="message bot-message loading-message">
+                      <div className="message-content">
+                        <p>
+                          <span className="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                          </span>
+                          AI is typing...
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="chat-welcome">
+                  <div className="welcome-icon">🤖</div>
+                  <h4>{isChatExpanded ? "Guided Chat Session" : "Welcome to Talkify!"}</h4>
+                  <p>
+                    {isChatExpanded 
+                      ? "Your guided chat session is now active. Ask me anything about your career, studies, or personal development!"
+                      : "Choose an action from Quick Actions to get started with your learning journey."
+                    }
+                  </p>
+                  {!isChatExpanded && (
+                    <div className="welcome-suggestions">
+                      <span>Try:</span>
+                      <ul>
+                        <li>🎯 Career Guidance MAX</li>
+                        <li>💬 Chat and Get Guided</li>
+                      </ul>
+                    </div>
+                  )}
+                  {isChatExpanded && (
+                    <div className="chat-examples">
+                      <span>Examples:</span>
+                      <ul>
+                        <li>💡 "What career paths suit my interests?"</li>
+                        <li>📚 "Help me plan my studies"</li>
+                        <li>🎯 "What skills should I develop?"</li>
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
+            {/* Chat Input - Only show when expanded */}
+            {isChatExpanded && (
+              <div className="chat-input-container">
+                <div className="chat-input-wrapper">
+                  <input
+                    type="text"
+                    placeholder={isChatLoading ? "AI is typing..." : "Type your message here..."}
+                    className="chat-input"
+                    disabled={isChatLoading}
+                    onKeyPress={async (e) => {
+                      if (e.key === 'Enter' && e.target.value.trim() && !isChatLoading) {
+                        const message = e.target.value.trim();
+                        e.target.value = '';
+                        await handleSendMessage(message);
+                      }
+                    }}
+                  />
+                  <button 
+                    className={`send-button ${isChatLoading ? 'loading' : ''}`}
+                    disabled={isChatLoading}
+                    onClick={async (e) => {
+                      const input = e.target.parentElement.querySelector('.chat-input');
+                      if (input.value.trim() && !isChatLoading) {
+                        const message = input.value.trim();
+                        input.value = '';
+                        await handleSendMessage(message);
+                      }
+                    }}
+                  >
+                    {isChatLoading ? (
+                      <div className="loading-spinner">⏳</div>
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="chat-interface">
-            {/* Chat Messages Panel */}
-            <div className="chat-panel">
-              <div className="chat-header">
-                <div className="header-content">
-                  <div className="chat-title">
-                    <h3>Career Assistant</h3>
-                    <div className="status-indicator">
-                      <span className={`status-dot ${isSpeaking ? 'speaking' : isProcessing ? 'processing' : 'active'}`}></span>
-                      <span className="status-text">
-                        {isSpeaking ? 'Speaking' : isProcessing ? 'Processing' : 'Ready'}
-                      </span>
+        </div>
+
+        {/* Div 2 - Action Buttons */}
+        {!isChatExpanded && (
+          <div className={`explore-div ${isQuizActive ? 'div2-quiz-active' : 'div2'}`}>
+          <div className="action-buttons-container">
+            <h3 className="section-title">
+              {isQuizActive ? "Your Answer Options" : "Quick Actions"}
+            </h3>
+            {error && (
+              <div className="error-message">
+                <p>⚠️ {error}</p>
+                <button onClick={resetQuiz} className="retry-button">
+                  Try Again
+                </button>
+              </div>
+            )}
+            <div className="action-buttons">
+              {(isQuizActive ? actionButtons : defaultActionButtons).map((button) => (
+                <button
+                  key={button.id}
+                  className={`action-button ${isLoading ? 'loading' : ''} ${isQuizActive ? 'quiz-button' : ''}`}
+                  onClick={() => handleButtonClick(button.action)}
+                  disabled={isLoading}
+                >
+                  <span className="button-icon">{button.icon}</span>
+                  <span className="button-label">{button.label}</span>
+                  {isLoading && <span className="loading-spinner">⏳</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        )}
+
+        {/* Div 3 - Main Area with Spline Background */}
+        {!isChatExpanded && (
+          <div className="explore-div div3">
+          <div className="main-area">
+            <div className="spline-background">
+              <spline-viewer
+                url={
+                  isDarkMode
+                    ? "https://prod.spline.design/jmhMBw1w7fytoypD/scene.splinecode"
+                    : "https://prod.spline.design/jmhMBw1w7fytoypD/scene.splinecode"
+                }
+                key={isDarkMode ? "dark" : "light"}
+              ></spline-viewer>
+            </div>
+          </div>
+        </div>
+        )}
+
+        {/* Div 4 - User Name Display */}
+        <div className="explore-div div4">
+          <div className="user-display">
+            <div className="user-profile">
+              <div className="user-avatar">
+                {(userData?.name || userName || 'U').charAt(0).toUpperCase()}
+              </div>
+              <div className="user-info">
+                <span className="user-name">
+                  {userData?.name || userName?.replace(/-/g, ' ') || 'User'}
+                </span>
+                <span className="user-stream">
+                  {userData?.stream || 'Not specified'}
+                </span>
+              </div>
+            </div>
+            <div className="user-status">
+              <span className="status-indicator">●</span>
+              <span className="status-text">Active</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Div 5 - Utility Buttons */}
+        <div className="explore-div div5">
+          <div className="utility-buttons">
+            <button
+              className="utility-button"
+              onClick={() => handleUtilityAction('voice')}
+              title="Voice Settings"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 1c-1.66 0-3 1.34-3 3v8c0 1.66 1.34 3 3 3s3-1.34 3-3V4c0-1.66-1.34-3-3-3zm5.91 11.09c-.49 0-.9.4-.9.91 0 2.83-2.31 5.14-5.01 5.14s-5.01-2.31-5.01-5.14c0-.51-.4-.91-.9-.91s-.91.4-.91.91c0 3.53 2.54 6.49 5.91 6.92v2.08h-2c-.55 0-1 .45-1 1s.45 1 1 1h6c.55 0 1-.45 1-1s-.45-1-1-1h-2v-2.08c3.37-.43 5.91-3.39 5.91-6.92 0-.51-.4-.91-.9-.91z"/>
+              </svg>
+            </button>
+            <button
+              className="utility-button"
+              onClick={() => handleUtilityAction('reset')}
+              title="Reset"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4 12c0-4.42 3.58-8 8-8s8 3.58 8 8-3.58 8-8 8-8-3.58-8-8zm6-2h4v4h-4v-4z"/>
+                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c1.95 0 3.73-.7 5.12-1.88l1.41 1.41C16.93 21.19 14.57 22 12 22 5.37 22 0 16.63 0 10S5.37-2 12-2c2.57 0 4.93.81 6.68 2.19l1.41-1.41-1.44-1.44L17.65 6.35z"/>
+              </svg>
+            </button>
+            <button
+              className="utility-button"
+              onClick={() => handleUtilityAction('theme')}
+              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDarkMode ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                </svg>
+              )}
+            </button>
+            <button
+              className="utility-button exit-button"
+              onClick={() => handleUtilityAction('exit')}
+              title="Exit to Home"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.3 5.71c-.39-.39-1.02-.39-1.41 0L12 10.59 7.11 5.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Div 6 - Step Indicator */}
+        <div className="explore-div div6">
+          <div className="step-indicator-container">
+            <div className="step-indicator">
+              {steps.map((step, index) => (
+                <React.Fragment key={step.id}>
+                  <div className={`step ${step.status === 'active' ? 'active' : 'inactive'}`}>
+                    <div 
+                      className={`step-circle ${step.status}`}
+                      title={step.label}
+                      style={{ userSelect: 'none' }}
+                    >
+                      {step.status === 'completed' ? '✓' : step.id}
+                    </div>
+                    <span className={`step-label ${step.status}`}>
+                      {step.label}
+                    </span>
+                  </div>
+                  {index < steps.length - 1 && (
+                    <div className={`step-connector ${
+                      step.status === 'completed' ? 'completed' : 
+                      step.status === 'active' ? 'active' : ''
+                    }`}></div>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Div 7 - Course Recommendation Showcase */}
+        {(isQuizComplete && showcaseData) && (
+          <div className="explore-div div7-showcase">
+            <div className="course-recommendation-card">
+              {/* Header Section */}
+              <div className="card-header">
+                <div className="header-left">
+                  <div className="recommendation-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                  </div>
+                  <div className="header-text">
+                    <h3>Perfect Match Found!</h3>
+                    <p>Based on your career assessment</p>
+                  </div>
+                </div>
+                <div className="header-right">
+                  <div className="confidence-score">
+                    <div className="score-circle">
+                      <span className="score-number">94%</span>
+                      <span className="score-label">Match</span>
                     </div>
                   </div>
-                  {userName && (
-                    <div className="user-info">
-                      <span className="user-name">{userName}</span>
-                      {userStream && <span className="user-stream">From {userStream}</span>}
+                  <button 
+                    className="close-recommendation-btn"
+                    onClick={() => {
+                      // You can add logic here to hide the recommendation
+                      console.log('Closing recommendation card');
+                    }}
+                    title="Close recommendation"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.3 5.71c-.39-.39-1.02-.39-1.41 0L12 10.59 7.11 5.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Course Preview Section */}
+              <div className="course-preview">
+                <div className="course-image-container">
+                  {showcaseData.imageUrl ? (
+                    <img 
+                      src={showcaseData.imageUrl} 
+                      alt={showcaseData.title}
+                      className="course-image"
+                    />
+                  ) : (
+                    <div className="course-placeholder">
+                      <div className="placeholder-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>
+                        </svg>
+                      </div>
+                      <span>Course Preview</span>
+                    </div>
+                  )}
+                  <div className="badge-container">
+                    <span className="recommendation-badge">{showcaseData.badge || "Recommended"}</span>
+                  </div>
+                </div>
+
+                <div className="course-details">
+                  <h4 className="course-title">{showcaseData.title}</h4>
+                  {showcaseData.subtitle && (
+                    <p className="course-subtitle">{showcaseData.subtitle}</p>
+                  )}
+                  
+                  {/* Key Features */}
+                  <div className="course-features">
+                    <div className="feature-item">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                      <span>Industry Standard</span>
+                    </div>
+                    <div className="feature-item">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4 0h-2v6h2v-6zm2.5-9H19V1h-2v1H7V1H5v1H4.5C3.12 2 2 3.12 2 4.5v14C2 19.88 3.12 21 4.5 21h15c1.38 0 2.5-1.12 2.5-2.5v-14C22 3.12 20.88 2 19.5 2z"/>
+                      </svg>
+                      <span>Self-paced</span>
+                    </div>
+                    <div className="feature-item">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                      <span>Certificate</span>
+                    </div>
+                  </div>
+
+                  {/* Reasoning */}
+                  {showcaseData.reasoning && (
+                    <div className="recommendation-reasoning">
+                      <div className="reasoning-header">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7.01 5 5 7.01 5 9.5S7.01 14 9.5 14 14 11.99 14 9.5 11.99 5 9.5 5z"/>
+                        </svg>
+                        <span>Why this course?</span>
+                      </div>
+                      <p className="reasoning-text">{showcaseData.reasoning}</p>
+                    </div>
+                  )}
+
+                  {/* Tags */}
+                  {showcaseData.tags && (
+                    <div className="skill-tags">
+                      {showcaseData.tags.slice(0, 4).map((tag, index) => (
+                        <span key={index} className="skill-tag">
+                          {tag}
+                        </span>
+                      ))}
+                      {showcaseData.tags.length > 4 && (
+                        <span className="more-tags">+{showcaseData.tags.length - 4} more</span>
+                      )}
                     </div>
                   )}
                 </div>
               </div>
-              
-              <div className="chat-messages">
-                {chatMessages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`message ${message.isUser ? 'user-message' : 'ai-message'}`}
-                  >
-                    <div className="message-content">
-                      <div className="message-text">
-                        {message.text.split('\n').map((line, index) => (
-                          <p key={index} style={{ margin: index === 0 ? '0' : '0.5rem 0 0 0' }}>
-                            {line}
-                          </p>
-                        ))}
-                      </div>
-                      <span className="message-time">
-                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-                
-                {/* Typing Indicator */}
-                {isTyping && (
-                  <div className="message ai-message">
-                    <div className="message-content">
-                      <div className="typing-indicator">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                <div ref={chatEndRef} />
-              </div>
-              
-              {/* Speaking/Processing Indicator */}
-              {(isSpeaking || isProcessing) && (
-                <div className="activity-indicator">
-                  <div className="activity-animation">
-                    <div className="pulse-ring"></div>
-                    <div className="activity-icon">
-                      {isSpeaking ? (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M12 1C9.5 1 7.5 3 7.5 5.5V11.5C7.5 14 9.5 16 12 16C14.5 16 16.5 14 16.5 11.5V5.5C16.5 3 14.5 1 12 1Z M19 10V11.5C19 15.65 15.65 19 11.5 19H12.5C16.65 19 20 15.65 20 11.5V10M12 19V23M8 23H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      ) : (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      )}
-                    </div>
-                  </div>
-                  <p>{isProcessing ? "Processing your input..." : "AI is speaking..."}</p>
-                </div>
-              )}
-            </div>
 
-            {/* Options Panel */}
-            <div className="options-panel">
-              <div className="options-header">
-                <h4>Explore Options</h4>
-                <div className="options-count">
-                  {currentOptions.length} {currentOptions.length === 1 ? 'option' : 'options'}
+              {/* Action Section */}
+              <div className="card-actions">
+                <button 
+                  className="primary-action-btn"
+                  onClick={handleSourceClick}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+                  </svg>
+                  <span>Start Learning</span>
+                </button>
+                <button className="secondary-action-btn">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                  <span>Save</span>
+                </button>
+              </div>
+
+              {/* Progress Indicator */}
+              <div className="progress-indicator">
+                <div className="progress-step completed">
+                  <span>Assessment</span>
+                </div>
+                <div className="progress-connector"></div>
+                <div className="progress-step active">
+                  <span>Recommendation</span>
+                </div>
+                <div className="progress-connector"></div>
+                <div className="progress-step">
+                  <span>Learning</span>
                 </div>
               </div>
-              
-              <div className="options-list">
-                {currentOptions.map((option, index) => (
-                  <button
-                    key={index}
-                    className="option-btn"
-                    onClick={() => handleOptionSelect(option)}
-                    disabled={isSpeaking || isProcessing || isTyping}
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <span className="option-text">{option}</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
-                ))}
-              </div>
-              
-              {/* Course Recommendations */}
-              {currentRecommendations.length > 0 && (
-                <div className="recommendations-section">
-                  <div className="recommendations-header">
-                    <h4>Recommended Courses</h4>
-                    <span className="recommendations-count">{currentRecommendations.length}</span>
-                  </div>
-                  <div className="recommendations-list">
-                    {currentRecommendations.map((rec, index) => (
-                      <div key={index} className="recommendation-card" style={{ animationDelay: `${index * 0.15}s` }}>
-                        <div className="rec-content">
-                          <h5>{rec.name}</h5>
-                          <p>{rec.reason}</p>
-                        </div>
-                        <a href={rec.link} target="_blank" rel="noopener noreferrer" className="course-link">
-                          <span>Learn More</span>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </a>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}
       </div>
 
-      {/* Hidden audio element */}
-      <audio ref={audioRef} style={{ display: 'none' }} />
+      {/* Exit Warning Popup */}
+      {showExitWarning && (
+        <div className="popup-overlay">
+          <div className="popup-container">
+            <div className="popup-header">
+              <h3>⚠️ Warning</h3>
+            </div>
+            <div className="popup-content">
+              <p>Are you sure you want to exit?</p>
+              <p className="warning-text">You will lose all your current progress and quiz answers.</p>
+            </div>
+            <div className="popup-actions">
+              <button className="popup-button cancel" onClick={handleCancelExit}>
+                Cancel
+              </button>
+              <button className="popup-button confirm" onClick={handleConfirmExit}>
+                Yes, Exit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Voice Settings Popup */}
+      {showVoiceSettings && (
+        <div className="popup-overlay">
+          <div className="popup-container voice-settings">
+            <div className="popup-header">
+              <h3>🎤 Voice Settings</h3>
+              <button className="close-button" onClick={handleCloseVoiceSettings}>
+                ✕
+              </button>
+            </div>
+            <div className="popup-content">
+              <div className="voice-option">
+                <label>Voice Type:</label>
+                <select className="voice-select">
+                  <option value="default">Default Voice</option>
+                  <option value="male">Male Voice</option>
+                  <option value="female">Female Voice</option>
+                  <option value="child">Child Voice</option>
+                </select>
+              </div>
+              <div className="voice-option">
+                <label>Speaking Speed:</label>
+                <input 
+                  type="range" 
+                  min="0.5" 
+                  max="2" 
+                  step="0.1" 
+                  defaultValue="1"
+                  className="speed-slider"
+                />
+                <span className="speed-value">Normal</span>
+              </div>
+              <div className="voice-option">
+                <label>Pitch:</label>
+                <input 
+                  type="range" 
+                  min="0.5" 
+                  max="2" 
+                  step="0.1" 
+                  defaultValue="1"
+                  className="pitch-slider"
+                />
+                <span className="pitch-value">Normal</span>
+              </div>
+              <div className="voice-preview">
+                <button className="preview-button">
+                  🔊 Test Voice
+                </button>
+              </div>
+            </div>
+            <div className="popup-actions">
+              <button className="popup-button cancel" onClick={handleCloseVoiceSettings}>
+                Cancel
+              </button>
+              <button className="popup-button confirm" onClick={handleCloseVoiceSettings}>
+                Save Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
