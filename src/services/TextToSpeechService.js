@@ -12,10 +12,53 @@ class TextToSpeechService {
     this.currentAudio = null;
     this.initializationPromise = null;
     
-    // API configuration similar to TalkifyAPI
-    this.baseURL = process.env.NODE_ENV === 'production' 
-      ? 'https://your-backend.railway.app'  // Replace with your Railway URL
+    // API configuration with fallback
+    this.primaryURL = process.env.NODE_ENV === 'production' 
+      ? 'https://talkify-inproduction.up.railway.app'  // Railway production URL
       : 'http://localhost:8000';
+
+    this.fallbackURL = process.env.NODE_ENV === 'production' 
+      ? 'http://localhost:8000'  // Fallback to localhost in production
+      : 'https://talkify-inproduction.up.railway.app';  // Fallback to Railway in development
+
+    this.baseURL = this.primaryURL;
+    this.lastWorkingURL = null;
+  }
+
+  /**
+   * Helper method to make requests with fallback
+   */
+  async makeRequestWithFallback(endpoint, options = {}) {
+    const urls = this.lastWorkingURL 
+      ? [this.lastWorkingURL, this.lastWorkingURL === this.primaryURL ? this.fallbackURL : this.primaryURL]
+      : [this.primaryURL, this.fallbackURL];
+
+    let lastError;
+
+    for (const baseURL of urls) {
+      try {
+        console.log(`🔗 TTS: Trying request to: ${baseURL}${endpoint}`);
+        const response = await fetch(`${baseURL}${endpoint}`, {
+          ...options,
+          timeout: 10000 // 10 second timeout
+        });
+
+        if (response.ok) {
+          this.baseURL = baseURL;
+          this.lastWorkingURL = baseURL;
+          console.log(`✅ TTS: Successfully connected to: ${baseURL}`);
+          return response;
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.warn(`❌ TTS: Failed to connect to ${baseURL}: ${error.message}`);
+        lastError = error;
+        continue;
+      }
+    }
+
+    throw new Error(`All TTS servers failed. Last error: ${lastError.message}`);
   }
 
   /**
@@ -35,11 +78,7 @@ class TextToSpeechService {
    */
   async _fetchApiKey() {
     try {
-      const response = await fetch(`${this.baseURL}/key`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      const response = await this.makeRequestWithFallback('/key');
       
       const data = await response.json();
       this.apiKey = data.api_key;

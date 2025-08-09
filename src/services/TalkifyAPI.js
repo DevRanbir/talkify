@@ -1,21 +1,64 @@
-// API configuration for Talkify backend integration
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://your-backend.railway.app/api/v1'  // Replace with your Railway URL
+// API configuration for Talkify backend integration with fallback
+const PRIMARY_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://talkify-inproduction.up.railway.app/api/v1'  // Railway production URL
   : 'http://localhost:8000/api/v1';
+
+const FALLBACK_URL = process.env.NODE_ENV === 'production' 
+  ? 'http://localhost:8000/api/v1'  // Fallback to localhost in production
+  : 'https://talkify-inproduction.up.railway.app/api/v1';  // Fallback to Railway in development
 
 class TalkifyAPI {
   constructor() {
-    this.baseURL = API_BASE_URL;
+    this.primaryURL = PRIMARY_URL;
+    this.fallbackURL = FALLBACK_URL;
+    this.baseURL = this.primaryURL;
     this.sessionId = null;
     this.conversationHistory = [];
     this.currentStep = 1;
     this.totalSteps = 15; // Increased from 6 to allow more questions
+    this.lastWorkingURL = null;
+  }
+
+  // Helper method to make requests with fallback
+  async makeRequestWithFallback(endpoint, options = {}, useBaseUrl = false) {
+    const urls = this.lastWorkingURL 
+      ? [this.lastWorkingURL, this.lastWorkingURL === this.primaryURL ? this.fallbackURL : this.primaryURL]
+      : [this.primaryURL, this.fallbackURL];
+
+    let lastError;
+
+    for (const baseURL of urls) {
+      try {
+        // For health check, remove /api/v1 from the URL
+        const finalUrl = useBaseUrl ? baseURL.replace('/api/v1', '') : baseURL;
+        console.log(`🔗 Trying request to: ${finalUrl}${endpoint}`);
+        const response = await fetch(`${finalUrl}${endpoint}`, {
+          ...options,
+          timeout: 10000 // 10 second timeout
+        });
+
+        if (response.ok) {
+          this.baseURL = baseURL;
+          this.lastWorkingURL = baseURL;
+          console.log(`✅ Successfully connected to: ${finalUrl}`);
+          return response;
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.warn(`❌ Failed to connect to ${baseURL}: ${error.message}`);
+        lastError = error;
+        continue;
+      }
+    }
+
+    throw new Error(`All servers failed. Last error: ${lastError.message}`);
   }
 
   // Health check
   async healthCheck() {
     try {
-      const response = await fetch(`${this.baseURL.replace('/api/v1', '')}/health`);
+      const response = await this.makeRequestWithFallback('/health', {}, true);
       return await response.json();
     } catch (error) {
       console.error('Health check failed:', error);
@@ -54,13 +97,12 @@ class TalkifyAPI {
   // Get the next question
   async getNextQuestion() {
     try {
-      console.log('🔗 Making request to:', `${this.baseURL}/next-question`);
-      console.log('📤 Request data:', {
+      console.log(' Request data:', {
         conversation_history: this.conversationHistory,
         user_id: this.sessionId
       });
       
-      const response = await fetch(`${this.baseURL}/next-question`, {
+      const response = await this.makeRequestWithFallback('/next-question', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,12 +114,6 @@ class TalkifyAPI {
       });
 
       console.log('📥 Response status:', response.status, response.statusText);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
-        console.error('❌ API Error:', errorData);
-        throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
-      }
 
       const data = await response.json();
       
@@ -177,7 +213,7 @@ class TalkifyAPI {
   // Get final course recommendation
   async getRecommendation() {
     try {
-      const response = await fetch(`${this.baseURL}/recommend`, {
+      const response = await this.makeRequestWithFallback('/recommend', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -187,11 +223,6 @@ class TalkifyAPI {
           user_id: this.sessionId
         })
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to get recommendation');
-      }
 
       const data = await response.json();
       return data;
@@ -287,18 +318,13 @@ class TalkifyAPI {
         requestBody.session_id = chatSessionId;
       }
 
-      const response = await fetch(`${this.baseURL}/chat`, {
+      const response = await this.makeRequestWithFallback('/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(requestBody)
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
-      }
 
       const data = await response.json();
       
@@ -321,12 +347,7 @@ class TalkifyAPI {
   // Get chat history for a session
   async getChatHistory(chatSessionId) {
     try {
-      const response = await fetch(`${this.baseURL}/chat/${chatSessionId}/history`);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
-      }
+      const response = await this.makeRequestWithFallback(`/chat/${chatSessionId}/history`);
 
       const data = await response.json();
       
