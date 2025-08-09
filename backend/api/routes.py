@@ -446,6 +446,7 @@ async def get_chat_history(session_id: str):
         
     except HTTPException:
         raise
+        
     except Exception as e:
         logger.error(f"Error fetching chat history: {str(e)}")
         raise HTTPException(

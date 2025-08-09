@@ -496,10 +496,10 @@ class GroqService:
                     - Study tips and learning strategies
                     - Technology and programming questions
                     - General educational guidance
-                    
-                    Be conversational, helpful, and encouraging. Provide detailed and actionable advice when possible.
-                    If users ask about courses, you can reference the courses available in the platform.
-                    Keep responses engaging but concise (aim for 2-3 paragraphs maximum)."""
+                    - dont use *emojies*, or symols or punctuation marks expect comma,and dot or interogative marks
+                    - never use *,',",`
+                    Be conversational, helpful, and encouraging. Keep responses SHORT and CONCISE - aim for 1-2 sentences or 1 short paragraph maximum.
+                    Provide direct, actionable advice without lengthy explanations."""
                 }
             ]
             
@@ -520,7 +520,7 @@ class GroqService:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
-                max_tokens=1000,
+                max_tokens=250,  # Reduced from 1000 to 250 for shorter responses
                 temperature=0.7,
                 stream=False
             )

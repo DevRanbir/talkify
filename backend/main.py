@@ -48,6 +48,36 @@ async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "message": "API is operational"}
 
+@app.get("/key")
+async def get_api_key():
+    """
+    Get the Groq API key for frontend TTS functionality
+    
+    Returns:
+        API key for Groq service
+    """
+    try:
+        settings = get_settings()
+        
+        if not settings.groq_api_key:
+            raise HTTPException(
+                status_code=500,
+                detail="API key not configured"
+            )
+        
+        return {
+            "api_key": settings.groq_api_key,
+            "status": "success"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error fetching API key: {str(e)}"
+        )
+
 if __name__ == "__main__":
     # Run the application
     uvicorn.run(

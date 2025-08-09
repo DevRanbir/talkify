@@ -6,19 +6,63 @@ import Groq from "groq-sdk";
  */
 class TextToSpeechService {
   constructor() {
-    this.groq = new Groq({
-      apiKey: process.env.REACT_APP_GROQ_API_KEY,
-      dangerouslyAllowBrowser: true // Enable browser usage
-    });
+    this.groq = null; // Will be initialized after getting API key
+    this.apiKey = null;
     this.isEnabled = true;
     this.currentAudio = null;
+    this.initializationPromise = null;
+    
+    // API configuration similar to TalkifyAPI
+    this.baseURL = process.env.NODE_ENV === 'production' 
+      ? 'https://your-backend.railway.app'  // Replace with your Railway URL
+      : 'http://localhost:8000';
+  }
+
+  /**
+   * Initialize the Groq client by fetching API key from backend
+   */
+  async initialize() {
+    if (this.initializationPromise) {
+      return this.initializationPromise;
+    }
+
+    this.initializationPromise = this._fetchApiKey();
+    return this.initializationPromise;
+  }
+
+  /**
+   * Fetch API key from backend
+   */
+  async _fetchApiKey() {
+    try {
+      const response = await fetch(`${this.baseURL}/key`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      this.apiKey = data.api_key;
+      
+      // Initialize Groq client with the fetched API key
+      this.groq = new Groq({
+        apiKey: this.apiKey,
+        dangerouslyAllowBrowser: true // Enable browser usage
+      });
+      
+      console.log('🔑 TTS service initialized with API key');
+      
+    } catch (error) {
+      console.error('Failed to fetch API key:', error);
+      this.isEnabled = false;
+    }
   }
 
   /**
    * Check if TTS is available and enabled
    */
   isAvailable() {
-    return this.isEnabled && process.env.REACT_APP_GROQ_API_KEY;
+    return this.isEnabled && this.apiKey && this.groq;
   }
 
   /**
@@ -38,11 +82,16 @@ class TextToSpeechService {
    * @returns {Promise<void>}
    */
   async speak(text, options = {}) {
-    if (!this.isAvailable() || !text?.trim()) {
-      return;
-    }
-
     try {
+      // Initialize the service if not already done
+      if (!this.groq) {
+        await this.initialize();
+      }
+
+      if (!this.isAvailable() || !text?.trim()) {
+        return;
+      }
+
       // Stop any currently playing audio
       this.stopSpeaking();
 
@@ -57,8 +106,8 @@ class TextToSpeechService {
 
       // Generate speech using Groq API
       const speechResponse = await this.groq.audio.speech.create({
-        model: "playai-tts",
-        voice: options.voice || "Ruby-PlayAI", // Default voice
+        model: "playai-tts-arabic",
+        voice: options.voice || "Amira-PlayAI", // Default voice
         response_format: "wav",
         input: cleanText,
         ...options
