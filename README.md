@@ -114,12 +114,11 @@ src/
 │   ├── Authors.js      # About the creators
 │   └── Contact.js      # Contact information and support
 ├── services/           # API and external service integrations
-│   ├── TalkifyAPI.js   # Main API service class
-│   ├── TextToSpeechService.js # Groq TTS integration
-│   ├── VideoService.js # Video content management
-│   └── VoiceChatService.js # Voice interaction handling
-└── utils/              # Utility functions and helpers
-    └── welcomeMessageUtils.js # Welcome message generation
+    ├── TalkifyAPI.js   # Main API service class
+    ├── TextToSpeechService.js # Groq TTS integration
+    ├── VideoService.js # Video content management
+    └── VoiceChatService.js # Voice interaction handling
+
 ```
 
 ### 🔧 **Backend Architecture**
