@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/talkify/static/css/main.32d37111.css",
-    "main.js": "/talkify/static/js/main.66fb7bad.js",
+    "main.css": "/talkify/static/css/main.fd8f361d.css",
+    "main.js": "/talkify/static/js/main.c58438e4.js",
     "static/js/453.4aa34eb7.chunk.js": "/talkify/static/js/453.4aa34eb7.chunk.js",
     "index.html": "/talkify/index.html",
-    "main.32d37111.css.map": "/talkify/static/css/main.32d37111.css.map",
-    "main.66fb7bad.js.map": "/talkify/static/js/main.66fb7bad.js.map",
+    "main.fd8f361d.css.map": "/talkify/static/css/main.fd8f361d.css.map",
+    "main.c58438e4.js.map": "/talkify/static/js/main.c58438e4.js.map",
     "453.4aa34eb7.chunk.js.map": "/talkify/static/js/453.4aa34eb7.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.32d37111.css",
-    "static/js/main.66fb7bad.js"
+    "static/css/main.fd8f361d.css",
+    "static/js/main.c58438e4.js"
   ]
 }
