@@ -3,7 +3,10 @@ API routes for the course recommendation system
 """
 
 import logging
-from fastapi import APIRouter, HTTPException, Depends
+import os
+from pathlib import Path
+from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi.responses import FileResponse
 from typing import List
 
 from models.schemas import (
@@ -452,4 +455,83 @@ async def get_chat_history(session_id: str):
         raise HTTPException(
             status_code=500,
             detail=f"Error fetching chat history: {str(e)}"
+        )
+
+@router.get("/vidmp4")
+async def get_video_mp4():
+    """
+    Serve the recommendation intro video in MP4 format
+    
+    Returns:
+        MP4 video file
+    """
+    try:
+        # Get the path to the video file
+        video_path = Path(__file__).parent.parent / "videos" / "recommender-intro.mp4"
+        
+        # Check if file exists
+        if not video_path.exists():
+            # Fallback to test video if main video doesn't exist
+            video_path = Path(__file__).parent.parent / "videos" / "test-video.mp4"
+            
+        if not video_path.exists():
+            raise HTTPException(
+                status_code=404,
+                detail="Video file not found"
+            )
+        
+        logger.info(f"Serving MP4 video: {video_path}")
+        return FileResponse(
+            path=str(video_path),
+            media_type="video/mp4",
+            headers={
+                "Cache-Control": "public, max-age=3600",
+                "Accept-Ranges": "bytes"
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error serving MP4 video: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error serving video: {str(e)}"
+        )
+
+@router.get("/vidwebm")
+async def get_video_webm():
+    """
+    Serve the recommendation intro video in WebM format
+    
+    Returns:
+        WebM video file
+    """
+    try:
+        # Get the path to the video file
+        video_path = Path(__file__).parent.parent / "videos" / "recommender-intro.webm"
+        
+        if not video_path.exists():
+            raise HTTPException(
+                status_code=404,
+                detail="WebM video file not found"
+            )
+        
+        logger.info(f"Serving WebM video: {video_path}")
+        return FileResponse(
+            path=str(video_path),
+            media_type="video/webm",
+            headers={
+                "Cache-Control": "public, max-age=3600",
+                "Accept-Ranges": "bytes"
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error serving WebM video: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error serving video: {str(e)}"
         )

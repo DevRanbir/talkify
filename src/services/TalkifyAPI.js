@@ -3,9 +3,7 @@ const PRIMARY_URL = process.env.NODE_ENV === 'production'
   ? 'https://talkify-inproduction.up.railway.app/api/v1'  // Railway production URL
   : 'http://localhost:8000/api/v1';
 
-const FALLBACK_URL = process.env.NODE_ENV === 'production' 
-  ? 'http://localhost:8000/api/v1'  // Fallback to localhost in production
-  : 'https://talkify-inproduction.up.railway.app/api/v1';  // Fallback to Railway in development
+const FALLBACK_URL = 'https://talkify-inproduction.up.railway.app/api/v1';  // Fallback to Railway in development
 
 class TalkifyAPI {
   constructor() {
@@ -75,7 +73,7 @@ class TalkifyAPI {
       // Create initial welcome message
       const welcomeMessage = {
         id: Date.now(),
-        text: `Welcome to Talkify! ${userName || 'User'}, I'm here to help you discover the perfect career path. Let's start with a few questions to understand your interests and goals.`,
+        text: `Hello ${userName || "there"}! I’m Talkify 🌟 Your career guide with Chandigarh University — helping you find your passion, pick the right course, and shape a future you’ll be proud of.`,
         sender: "bot",
         timestamp: new Date().toLocaleTimeString(),
         type: "welcome"

@@ -21,7 +21,13 @@ const Explore = () => {
   const [chatError, setChatError] = useState(null);
   const [voiceSettings, setVoiceSettings] = useState(voiceChatService.getVoiceSettings());
   const [availableModels] = useState(voiceChatService.getAvailableModels());
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [showVideoTransition, setShowVideoTransition] = useState(false);
+  const [videoLoadFailed, setVideoLoadFailed] = useState(false);
+  const [videoHasPlayed, setVideoHasPlayed] = useState(false);
   const chatMessagesRef = useRef(null);
+  const videoRef = useRef(null);
+  const videoTimeoutRef = useRef(null);
   
   // Use the quiz manager hook
   const {
@@ -50,7 +56,7 @@ const Explore = () => {
     { id: 2, label: "Interests", status: "pending" },
     { id: 3, label: "Skills", status: "pending" },
     { id: 4, label: "Preferences", status: "pending" },
-    { id: 5, label: "Analysis", status: "pending" },
+    { id: 5, label: "Mixup", status: "pending" },
     { id: 6, label: "Results", status: "pending" }
   ]);
 
@@ -70,14 +76,27 @@ const Explore = () => {
     script.src = "https://unpkg.com/@splinetool/viewer@1.10.42/build/spline-viewer.js";
     document.head.appendChild(script);
 
+    // Periodic check for voice settings updates (to handle rate limit recovery)
+    const voiceCheckInterval = setInterval(() => {
+      setVoiceSettings(voiceChatService.getVoiceSettings());
+    }, 30000); // Check every 30 seconds
+
+    // Register for immediate voice status change notifications
+    const handleVoiceStatusChange = () => {
+      setVoiceSettings(voiceChatService.getVoiceSettings());
+    };
+    voiceChatService.addStatusChangeCallback(handleVoiceStatusChange);
+
     return () => {
       if (document.head.contains(script)) {
         document.head.removeChild(script);
       }
+      clearInterval(voiceCheckInterval);
+      voiceChatService.removeStatusChangeCallback(handleVoiceStatusChange);
     };
   }, [userName]);
 
-  // Update steps based on quiz progress
+  // Update steps based on quiz progress and reset video state when quiz starts
   useEffect(() => {
     if (isQuizActive || isQuizComplete) {
       setSteps(prevSteps => 
@@ -91,16 +110,47 @@ const Explore = () => {
           }
         })
       );
+      
+      // Reset video state when a new quiz starts (but not when quiz completes)
+      if (isQuizActive && progress.currentStep === 1 && videoHasPlayed) {
+        console.log('🔄 New quiz started - resetting video state');
+        setVideoHasPlayed(false);
+        setVideoLoadFailed(false);
+        setIsVideoPlaying(false);
+        setShowVideoTransition(false);
+      }
     }
-  }, [progress, isQuizActive, isQuizComplete]);
+  }, [progress, isQuizActive, isQuizComplete, videoHasPlayed]);
 
   // Show showcase when quiz completes and data is available
   useEffect(() => {
-    if (isQuizComplete && showcaseData) {
+    if (isQuizComplete && showcaseData && !isVideoPlaying && !videoLoadFailed && !videoHasPlayed) {
+      // Start video transition before showing showcase (only if video hasn't played yet)
+      console.log('🎬 Starting video transition for the first time');
+      setShowVideoTransition(true);
+      setIsVideoPlaying(true);
+      setShowShowcase(false); // Ensure showcase is hidden while video is playing
+      
+      // Set a longer timeout to allow video to load
+      videoTimeoutRef.current = setTimeout(() => {
+        console.log('⏰ Video timeout reached - showing showcase');
+        setVideoLoadFailed(true);
+        handleVideoEnd();
+      }, 10000); // Increased to 10 seconds
+    } else if (isQuizComplete && showcaseData && (videoLoadFailed || videoHasPlayed) && !isVideoPlaying) {
+      // Show showcase if video failed OR has already played
+      console.log('🎬 Showing showcase - video failed or already played');
       setShowShowcase(true);
-      console.log('🎯 Quiz completed! Showing course recommendation:', showcaseData);
     }
-  }, [isQuizComplete, showcaseData]);
+    
+    // Cleanup timeout on unmount or when video ends
+    return () => {
+      if (videoTimeoutRef.current) {
+        clearTimeout(videoTimeoutRef.current);
+        videoTimeoutRef.current = null;
+      }
+    };
+  }, [isQuizComplete, showcaseData, isVideoPlaying, videoLoadFailed, videoHasPlayed]);
 
   // Auto-scroll chat messages when new messages are added
   useEffect(() => {
@@ -144,12 +194,16 @@ const Explore = () => {
         // Initialize chat session with a welcome message
         const welcomeMessage = {
           id: Date.now(),
-          text: `Hello ${userData?.name || userName || "there"}! 👋 I'm your personal guidance assistant. I'm here to help you with career planning, study strategies, and skill development. What would you like to explore today?`,
+          text: `Hello ${userData?.name || userName || "there"}! 👋 I’m Talkify, Your career guide with Chandigarh University — helping you find your passion, pick the right course, and shape a future you'll be proud of.`,
           sender: 'bot',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         
         setLocalChatMessages([welcomeMessage]);
+        
+        // Always speak the welcome message
+        await voiceChatService.forceSpeak(welcomeMessage.text);
+        
         hideLoader("chat");
         setIsChatLoading(false);
         console.log('✅ Chat and Get Guided mode activated');
@@ -181,29 +235,6 @@ const Explore = () => {
     }
   };
 
-  const handleStepClick = (stepId) => {
-    // Only allow clicking previous steps or current step
-    if (stepId <= progress.currentStep) {
-      // Update step status when clicked
-      setSteps(prevSteps => 
-        prevSteps.map(step => {
-          if (step.id === stepId) {
-            return { ...step, status: "active" };
-          } else if (step.id < stepId) {
-            return { ...step, status: "completed" };
-          } else {
-            return { ...step, status: "pending" };
-          }
-        })
-      );
-      
-      showLoader(`Loading step ${stepId}...`, `step-${stepId}`);
-      setTimeout(() => {
-        hideLoader(`step-${stepId}`);
-      }, 1000);
-    }
-  };
-
   const handleSourceClick = () => {
     if (showcaseData && showcaseData.link) {
       showLoader("Opening course...", "source");
@@ -225,7 +256,11 @@ const Explore = () => {
           // Reset quiz and clear any session data
           resetQuiz();
           setIsChatExpanded(false); // Collapse chat on reset
-          setShowShowcase(true); // Reset showcase visibility
+          setShowShowcase(false); // Hide showcase on reset
+          setIsVideoPlaying(false); // Reset video state
+          setShowVideoTransition(false); // Reset video transition
+          setVideoLoadFailed(false); // Reset video error state
+          setVideoHasPlayed(false); // Reset video played state
           console.log("Session reset successfully!");
           hideLoader("reset");
         }, 1000);
@@ -334,6 +369,8 @@ const Explore = () => {
     const newSettings = { ...voiceSettings, isVoiceEnabled: !voiceSettings.isVoiceEnabled };
     setVoiceSettings(newSettings);
     voiceChatService.setVoiceEnabled(newSettings.isVoiceEnabled);
+    
+    // Note: Video sound is now independent of voice settings
   };
 
   const toggleAutoSpeak = () => {
@@ -354,6 +391,81 @@ const Explore = () => {
 
   const stopSpeaking = () => {
     voiceChatService.stopSpeaking();
+  };
+
+  const retryTTS = () => {
+    voiceChatService.retryTTS();
+    setVoiceSettings(voiceChatService.getVoiceSettings());
+    console.log('🔄 TTS retry requested');
+    
+    // Show feedback to user
+    if (!voiceChatService.getVoiceSettings().isTemporarilyDisabled) {
+      console.log('✅ TTS service restored successfully');
+    }
+  };
+
+  // Video handling functions
+  const handleVideoLoadedData = () => {
+    console.log('✅ Video loaded successfully');
+    // Clear timeout since video loaded successfully
+    if (videoTimeoutRef.current) {
+      clearTimeout(videoTimeoutRef.current);
+      videoTimeoutRef.current = null;
+    }
+    
+    // Ensure showcase is hidden while video plays
+    setShowShowcase(false);
+    
+    // Only play if video hasn't played before and is supposed to be playing
+    if (videoRef.current && isVideoPlaying && !videoHasPlayed) {
+      // Enable video sound by default
+      videoRef.current.muted = false;
+      videoRef.current.volume = 0.8; // Set volume to 80%
+      console.log('🎬 Starting video playback with sound...');
+      videoRef.current.play().catch(error => {
+        console.error('❌ Video play failed:', error);
+        setVideoLoadFailed(true);
+        handleVideoEnd();
+      });
+    } else if (videoHasPlayed) {
+      console.log('🎬 Video has already played, skipping playback');
+      handleVideoEnd();
+    }
+  };
+
+  const handleVideoTimeUpdate = () => {
+    if (videoRef.current) {
+      const currentTime = videoRef.current.currentTime;
+      const duration = videoRef.current.duration;
+      
+      // Show showcase 1 second before video ends
+      if (duration - currentTime <= 1 && !showShowcase && isVideoPlaying) {
+        console.log('🎬 Showing showcase 1 second before video ends');
+        setShowShowcase(true);
+      }
+    }
+  };
+
+  const handleVideoEnd = () => {
+    console.log('🎬 Video ended or failed - marking as played and showing showcase');
+    // Clear timeout if video ends naturally
+    if (videoTimeoutRef.current) {
+      clearTimeout(videoTimeoutRef.current);
+      videoTimeoutRef.current = null;
+    }
+    
+    setIsVideoPlaying(false);
+    setShowVideoTransition(false);
+    setVideoHasPlayed(true); // Mark that video has played to prevent replay
+    setShowShowcase(true);
+  };
+
+  const handleVideoError = (error) => {
+    console.error('🚨 Video loading failed:', error.target?.error);
+    console.log('📁 Video API endpoints attempted: /api/v1/vidmp4 and /api/v1/vidwebm');
+    console.log('🔍 Check if backend is running and video files exist in backend/videos/ folder');
+    setVideoLoadFailed(true);
+    handleVideoEnd();
   };
 
   return (
@@ -553,7 +665,8 @@ const Explore = () => {
         {!isChatExpanded && (
           <div className="explore-div div3">
           <div className="main-area">
-            <div className="spline-background">
+            {/* Spline Background */}
+            <div className={`spline-background ${showVideoTransition ? 'fade-out' : 'fade-in'}`}>
               <spline-viewer
                 url={
                   isDarkMode
@@ -563,6 +676,45 @@ const Explore = () => {
                 key={isDarkMode ? "dark" : "light"}
               ></spline-viewer>
             </div>
+            
+            {/* Video Overlay */}
+            {showVideoTransition && !videoLoadFailed && (
+              <div className={`video-overlay ${isVideoPlaying ? 'fade-in' : 'fade-out'}`}>
+                <video
+                  ref={videoRef}
+                  className="recommendation-video"
+                  muted={false}
+                  playsInline
+                  onLoadedData={handleVideoLoadedData}
+                  onTimeUpdate={handleVideoTimeUpdate}
+                  onEnded={handleVideoEnd}
+                  onError={handleVideoError}
+                  onLoadStart={() => console.log('🎬 Video load started')}
+                  onCanPlay={() => console.log('🎬 Video can play')}
+                  onPlaying={() => console.log('🎬 Video is playing')}
+                  preload="auto"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    zIndex: 10
+                  }}
+                >
+                  <source src={`${process.env.NODE_ENV === 'production' ? 'https://talkify-inproduction.up.railway.app' : 'http://localhost:8000'}/api/v1/vidmp4`} type="video/mp4" />
+                  <source src={`${process.env.NODE_ENV === 'production' ? 'https://talkify-inproduction.up.railway.app' : 'http://localhost:8000'}/api/v1/vidwebm`} type="video/webm" />
+                  Your browser does not support the video tag.
+                </video>
+                
+                <div className="video-loading">
+                  <div className="loading-spinner">🎬</div>
+                  <p>Loading personalized video...</p>
+                  <small>If video doesn't load, we'll show your results directly</small>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         )}
@@ -590,13 +742,16 @@ const Explore = () => {
         <div className="explore-div div5">
           <div className="utility-buttons">
             <button
-              className="utility-button"
+              className={`utility-button ${voiceSettings.isTemporarilyDisabled ? 'rate-limited' : ''}`}
               onClick={() => handleUtilityAction('voice')}
-              title="Voice Settings"
+              title={voiceSettings.isTemporarilyDisabled ? "Voice Settings (Rate Limited)" : "Voice Settings"}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 1c-1.66 0-3 1.34-3 3v8c0 1.66 1.34 3 3 3s3-1.34 3-3V4c0-1.66-1.34-3-3-3zm5.91 11.09c-.49 0-.9.4-.9.91 0 2.83-2.31 5.14-5.01 5.14s-5.01-2.31-5.01-5.14c0-.51-.4-.91-.9-.91s-.91.4-.91.91c0 3.53 2.54 6.49 5.91 6.92v2.08h-2c-.55 0-1 .45-1 1s.45 1 1 1h6c.55 0 1-.45 1-1s-.45-1-1-1h-2v-2.08c3.37-.43 5.91-3.39 5.91-6.92 0-.51-.4-.91-.9-.91z"/>
               </svg>
+              {voiceSettings.isTemporarilyDisabled && (
+                <span className="rate-limit-indicator">⚠️</span>
+              )}
             </button>
             <button
               className="utility-button"
@@ -693,7 +848,12 @@ const Explore = () => {
                       <span className="stat-label">SESSION</span>
                     </div>
                     <div className="stat-item">
-                      <span className="stat-number">{voiceSettings.isVoiceEnabled ? 'ON' : 'OFF'}</span>
+                      <span className="stat-number">
+                        {voiceSettings.isTemporarilyDisabled 
+                          ? 'RATE LIMITED' 
+                          : voiceSettings.isVoiceEnabled ? 'ON' : 'OFF'
+                        }
+                      </span>
                       <span className="stat-label">VOICE</span>
                     </div>
                   </div>
@@ -750,7 +910,7 @@ const Explore = () => {
         </div>
 
         {/* Div 7 - Course Recommendation Showcase */}
-        {(isQuizComplete && showcaseData && showShowcase) && (
+        {(isQuizComplete && showcaseData && showShowcase && !isVideoPlaying && !showVideoTransition && (videoHasPlayed || videoLoadFailed)) && (
           <div className="explore-div div7-showcase">
             <div className="course-recommendation-card">
               {/* Header Section */}
@@ -919,11 +1079,15 @@ const Explore = () => {
       {/* Voice Settings Popup */}
       {showVoiceSettings && (
         <div className="popup-overlay">
-          <div className="popup-container voice-settings-modern">
+          <div className={`popup-container voice-settings-modern ${voiceSettings.isTemporarilyDisabled ? 'rate-limited' : ''}`}>
             <div className="voice-settings-header">
               <div className="header-content">
-                <div className="header-icon">🎤</div>
-                <h3>Voice Settings</h3>
+                <div className="header-icon">
+                  {voiceSettings.isTemporarilyDisabled ? '⚠️' : '🎤'}
+                </div>
+                <h3>
+                  {voiceSettings.isTemporarilyDisabled ? 'Voice Service Issues' : 'Voice Settings'}
+                </h3>
               </div>
               <button className="close-btn" onClick={handleCloseVoiceSettings}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -933,113 +1097,134 @@ const Explore = () => {
             </div>
             
             <div className="voice-settings-content">
-              {/* Voice Controls Row */}
-              <div className="settings-row voice-controls-row">
-                <div className="row-header">
-                  <h4>Controls</h4>
-                  <span className="row-subtitle">Voice functionality</span>
-                </div>
-                <div className="controls-group">
-                  <div className="control-item">
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={voiceSettings.isVoiceEnabled}
-                        onChange={toggleVoice}
-                      />
-                      <span className="toggle-slider"></span>
-                    </label>
-                    <span className="control-label">Voice</span>
-                  </div>
-                  
-                  <div className="control-item">
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={voiceSettings.autoSpeak}
-                        onChange={toggleAutoSpeak}
-                        disabled={!voiceSettings.isVoiceEnabled}
-                      />
-                      <span className="toggle-slider"></span>
-                    </label>
-                    <span className="control-label">Auto-speak</span>
-                  </div>
-                  
-                  {voiceChatService.isSpeaking() && (
-                    <div className="control-item">
-                      <button className="stop-btn" onClick={stopSpeaking}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M6 6h12v12H6z"/>
-                        </svg>
-                        Stop
+              {/* Rate Limit Warning */}
+              {voiceSettings.isTemporarilyDisabled ? (
+                <div className="settings-row rate-limit-warning">
+                  <div className="warning-content">
+                    <div className="warning-icon">⚠️</div>
+                    <div className="warning-text">
+                      <h4>Voice Service Temporarily Unavailable</h4>
+                      <p>TTS service is temporarily disabled due to rate limits. The system has automatically switched to backup settings. Please wait a moment before retrying.</p>
+                      <button 
+                        className="retry-tts-btn"
+                        onClick={retryTTS}
+                      >
+                        🔄 Retry Voice Service
                       </button>
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
-
-              {/* Model Selection Row */}
-              <div className="settings-row model-selection-row">
-                <div className="row-header">
-                  <h4>Language Model</h4>
-                  <span className="row-subtitle">TTS engine selection</span>
-                </div>
-                <div className="selection-group">
-                  {Object.entries(availableModels).map(([modelId, modelInfo]) => (
-                    <div 
-                      key={modelId}
-                      className={`model-option ${voiceSettings.tts.model === modelId ? 'selected' : ''}`}
-                      onClick={() => handleModelChange(modelId)}
-                    >
-                      <div className="option-icon">
-                        {modelId === 'playai-tts-arabic' ? '🌍' : '🇺🇸'}
-                      </div>
-                      <div className="option-content">
-                        <span className="option-title">{modelInfo.name}</span>
-                        <span className="option-subtitle">
-                          {modelId === 'playai-tts-arabic' ? 'Multi-language support' : 'English optimized'}
-                        </span>
-                      </div>
-                      <div className="option-indicator">
-                        {voiceSettings.tts.model === modelId && (
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                          </svg>
-                        )}
-                      </div>
+              ) : (
+                <>
+                  {/* Voice Controls Row */}
+                  <div className="settings-row voice-controls-row">
+                    <div className="row-header">
+                      <h4>Controls</h4>
+                      <span className="row-subtitle">Voice functionality</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Voice Selection Row */}
-              <div className="settings-row voice-selection-row">
-                <div className="row-header">
-                  <h4>Voice Character</h4>
-                  <span className="row-subtitle">Select voice persona</span>
-                </div>
-                <div className="voice-grid">
-                  {availableModels[voiceSettings.tts.model]?.voices.map((voice) => (
-                    <div 
-                      key={voice}
-                      className={`voice-option ${voiceSettings.tts.voice === voice ? 'selected' : ''}`}
-                      onClick={() => handleVoiceChange(voice)}
-                    >
-                      <div className="voice-avatar">
-                        {voice.charAt(0)}
+                    <div className="controls-group">
+                      <div className="control-item">
+                        <label className="toggle-switch">
+                          <input 
+                            type="checkbox" 
+                            checked={voiceSettings.isVoiceEnabled}
+                            onChange={toggleVoice}
+                          />
+                          <span className="toggle-slider"></span>
+                        </label>
+                        <span className="control-label">Voice</span>
                       </div>
-                      <span className="voice-name">{voice.replace('-PlayAI', '')}</span>
-                      {voiceSettings.tts.voice === voice && (
-                        <div className="selected-indicator">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                          </svg>
+                      
+                      <div className="control-item">
+                        <label className="toggle-switch">
+                          <input 
+                            type="checkbox" 
+                            checked={voiceSettings.autoSpeak}
+                            onChange={toggleAutoSpeak}
+                            disabled={!voiceSettings.isVoiceEnabled}
+                          />
+                          <span className="toggle-slider"></span>
+                        </label>
+                        <span className="control-label">Auto-speak</span>
+                      </div>
+                      
+                      {voiceChatService.isSpeaking() && (
+                        <div className="control-item">
+                          <button className="stop-btn" onClick={stopSpeaking}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M6 6h12v12H6z"/>
+                            </svg>
+                            Stop
+                          </button>
                         </div>
                       )}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+
+                  {/* Model Selection Row */}
+                  <div className="settings-row model-selection-row">
+                    <div className="row-header">
+                      <h4>Language Model</h4>
+                      <span className="row-subtitle">TTS engine selection</span>
+                    </div>
+                    <div className="selection-group">
+                      {Object.entries(availableModels).map(([modelId, modelInfo]) => (
+                        <div 
+                          key={modelId}
+                          className={`model-option ${voiceSettings.tts.model === modelId ? 'selected' : ''}`}
+                          onClick={() => handleModelChange(modelId)}
+                        >
+                          <div className="option-icon">
+                            {modelId === 'playai-tts-arabic' ? '🌍' : '🇺🇸'}
+                          </div>
+                          <div className="option-content">
+                            <span className="option-title">{modelInfo.name}</span>
+                            <span className="option-subtitle">
+                              {modelId === 'playai-tts-arabic' ? 'Multi-language support' : 'English optimized'}
+                            </span>
+                          </div>
+                          <div className="option-indicator">
+                            {voiceSettings.tts.model === modelId && (
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                              </svg>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Voice Selection Row */}
+                  <div className="settings-row voice-selection-row">
+                    <div className="row-header">
+                      <h4>Voice Character</h4>
+                      <span className="row-subtitle">Select voice persona</span>
+                    </div>
+                    <div className="voice-grid">
+                      {availableModels[voiceSettings.tts.model]?.voices.map((voice) => (
+                        <div 
+                          key={voice}
+                          className={`voice-option ${voiceSettings.tts.voice === voice ? 'selected' : ''}`}
+                          onClick={() => handleVoiceChange(voice)}
+                        >
+                          <div className="voice-avatar">
+                            {voice.charAt(0)}
+                          </div>
+                          <span className="voice-name">{voice.replace('-PlayAI', '')}</span>
+                          {voiceSettings.tts.voice === voice && (
+                            <div className="selected-indicator">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

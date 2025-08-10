@@ -1,0 +1,90 @@
+B.E. Aerospace Engineering: https://www.cuchd.in/engineering/be-aerospace.php
+B.E. Automobile Engineering: https://www.cuchd.in/engineering/be-automobile-engineering.php
+B.E. BioTechnology Engineering: https://www.cuchd.in/engineering/be-biotechnology.php
+B.E. Chemical Engineering: https://www.cuchd.in/engineering/be-chemical-engineering.php
+B.E. Civil Engineering: https://www.cuchd.in/engineering/be-civil-engineering.php
+B.E. Computer Science & Engineering: https://www.cuchd.in/engineering/be-computer-science-engineering.php
+B.E. Electrical Engineering: https://www.cuchd.in/engineering/be-electrical-engineering.php
+Bachelor of Engineering (Hons.) Computer Science & Engineering (Artificial Intelligence) with Microsoft: https://www.cuchd.in/engineering/be-cse-artificial-intelligence.php
+B.E. Electronics and Communication Engineering: https://www.cuchd.in/engineering/be-electronics-communication-engineering.php
+B.E. Information Technology Engineering: https://www.cuchd.in/engineering/be-information-technology.php
+B.E. Mechanical Engineering: https://www.cuchd.in/engineering/be-mechanical-engineering.php
+B.E. Mechatronics Engineering: https://www.cuchd.in/engineering/be-mechatronics.php
+B.E. Food Technology Engineering: https://www.cuchd.in/engineering/be-food-technology.php
+Bachelor of Engineering (Computer Science and Engineering) with Specialization in Full Stack Development: https://www.cuchd.in/engineering/be-cse-full-stack-development.php
+M.E. Automobile Engineering: https://www.cuchd.in/engineering/me-automobile-engineering.php
+M.E. Computer Science & Engineering: https://www.cuchd.in/engineering/me-computer-science-engineering.php
+M.E. Electronics and Communication Engineering: https://www.cuchd.in/engineering/me-electronics-and-communication-engineering.php
+M.E. Electrical Engineering: https://www.cuchd.in/engineering/me-electrical-engineering.php
+M.E. Mechanical Engineering: https://www.cuchd.in/engineering/me-mechanical-engineering.php
+M.E. CSE Artificial Intelligence and Machine Learning Engineering: https://www.cuchd.in/engineering/me-artificial-intelligence-and-machine-learning.php
+M.E. Electrical Engineering - Electric Vehicles: https://www.cuchd.in/engineering/me-electrical-engineering-electric-vehicles.php
+M.E. Civil - Transportation Engineering: https://www.cuchd.in/engineering/me-transportation-engineering.php
+M.E. Civil - Construction Technology and Management Engineering: https://www.cuchd.in/engineering/me-ctm-engineering.php
+M.E. Civil - Structural Engineering: https://www.cuchd.in/engineering/me-structural-engineering.php
+M.E. Civil - Geotechnical Engineering: https://www.cuchd.in/engineering/me-geotechnical-engineering.php
+M.E. Civil - Environment Engineering: https://www.cuchd.in/engineering/me-environment-engineering.php
+M.E. Robotics and Automation Engineering: https://www.cuchd.in/engineering/me-robotics.php
+M.E. Artificial Intelligence Engineering: https://www.cuchd.in/engineering/me-artificial-intelligence.php
+M.E. CSE Data Science Engineering: https://www.cuchd.in/engineering/me-data-science.php
+Doctorate of Philosophy (Electrical Engineering): https://www.cuchd.in/doctorate-programs/phd-electrical-engineering.php
+Doctorate of Philosophy (Mechanical Engineering): https://www.cuchd.in/doctorate-programs/phd-mechanical-engineering.php
+Doctorate of Philosophy (Computer Science Engineering): https://www.cuchd.in/doctorate-programs/phd-computer-science.php
+Doctorate of Philosophy (Civil Engineering): https://www.cuchd.in/doctorate-programs/phd-civil-engineering.php
+Doctorate of Philosophy (Electronics & Communication Engineering): https://www.cuchd.in/doctorate-programs/phd-electronics-and-communication.php
+Management (BBA/MBA): https://www.cuchd.in/management/
+Industry Collaborated (BBA/MBA): https://www.cuchd.in/apex-management/
+Computing (BCA/MCA): https://www.cuchd.in/computing/
+Airlines & Airport Management: https://www.cuchd.in/hotel-management-and-tourism/bsc-airline-and-airport-management.php
+Allied Health Sciences: https://www.cuchd.in/applied-health-sciences/
+Animation & Multimedia: https://www.cuchd.in/animation-and-multimedia/
+Architecture: https://www.cuchd.in/architecture-and-design/
+Arts & Humanities (B.A & M.A): https://www.cuchd.in/liberal-arts-and-humanities/
+Basic Sciences (Physics/Chemistry/Maths): https://www.cuchd.in/basic-sciences/
+Biotechnology & Biosciences: https://www.cuchd.in/biotechnology/
+B.Sc. Medical: https://www.cuchd.in/biosciences/bsc-medical.php
+Commerce (B.Com/M.Com): https://www.cuchd.in/commerce/
+Travel and Tourism: https://www.cuchd.in/hotel-management-and-tourism/bsc-travel-and-tourism-management.php
+Culinary Sciences: https://www.cuchd.in/hotel-management-and-tourism/bsc-culinary-arts.php
+Data Science: https://www.cuchd.in/basic-sciences/msc-data-sciences.php
+Economics: https://www.cuchd.in/economics/
+Education (B.A.B.Ed/ B.Sc.B.Ed): https://www.cuchd.in/teachers-training-and-research/
+Fashion & Design: https://www.cuchd.in/design/bachelor-of-design-fashion.php
+Finance & Accounting: https://www.cuchd.in/finance-and-accounting
+Fine Arts: https://www.cuchd.in/design/fine-arts.php
+Forensic Sciences (B.Sc./M.Sc.): https://www.cuchd.in/applied-health-sciences/
+Hotel & Hospitality Management: https://www.cuchd.in/hotel-management-and-tourism/bsc-hotel-and-hospitality-management.php
+Interior Design: https://www.cuchd.in/design/bachelor-of-design-interior.php
+Legal Studies: https://www.cuchd.in/legal-studies/
+Mathematics (B.Sc./M.Sc./Phd): https://www.cuchd.in/basic-sciences/
+M.Sc. Zoology/Botany: https://www.cuchd.in/biosciences/
+Microbiology: https://www.cuchd.in/biotechnology/msc-industrial-microbiology.php
+MBA Tourism, Hospitality and Aviation: https://www.cuchd.in/management/MBA-tourism-and-hospitality-management.php
+Media Studies: https://www.cuchd.in/journalism-and-mass-communication/
+Medical Lab Technology: https://www.cuchd.in/applied-health-sciences/bsc-in-mlt.php
+Nutrition & Dietetics: https://www.cuchd.in/applied-health-sciences/bsc-nutrition-dietetics.php
+Optometry: https://www.cuchd.in/applied-health-sciences/bachelor-of-optometry.php
+Pharma Sciences: https://www.cuchd.in/pharma-sciences/
+Physiotherapy: https://www.cuchd.in/applied-health-sciences/bachelor-of-physiotherapy.php
+Product & Industrial Design: https://www.cuchd.in/design/bachelor-of-design.php
+Psychology: https://www.cuchd.in/liberal-arts-and-humanities/
+MCA Data Science with Intel: https://www.cuchd.in/computing/mca-data-science.php
+CSE with IBM: https://www.cuchd.in/IBM/
+ME CSE Cloud Computing with Virtusa: https://www.cuchd.in/engineering/virtusa-me-cse-cloud-computing.php
+CSE with TCS: https://www.cuchd.in/TCS/
+B.Com in Applied Finance & Accounting with Grant Thornton: https://www.cuchd.in/finance-and-accounting/bcom-in-applied-finance-and-analytics-acca-gt.php
+MBA Healthcare and Hospital Management: https://www.cuchd.in/apex-management/mba-healthcare-and-life-sciences.php
+MBA in Capital Markets with NISM: https://www.cuchd.in/management/mba-capital-markets.php
+MBA Strategic HR with AON: https://www.cuchd.in/apex-management/mba-strategic-hr.php
+MBA Data Science & AI with SAS: https://www.cuchd.in/apex-management/mba-data-science-and-artificial-intelligence.php
+MBA Business Analytics with IBM: https://www.cuchd.in/IBM/MBA-business-analytics.php
+MBA in Applied Finance with PwC: https://www.cuchd.in/finance-and-accounting/mba-applied-finance.php
+MBA with SBI: https://www.cuchd.in/apex-management/bfe.php
+MBA Digital Marketing: https://www.cuchd.in/apex-management/mba-master-of-business-digital-marketing.php
+MBA Fintech with NSE Academy: https://www.cuchd.in/apex-management/mba-fintech.php
+MBA Logistics and Supply Chain Management with CII: https://www.cuchd.in/apex-management/MBA-logistics-and-supply-chain-management.php
+Doctor of Philosophy: https://www.cuchd.in/doctorate-programs/
+Ph.D Admissions: https://www.cuchd.in/phd-me-admissions/ApplicationRegistration.aspx?Subject=fJAt3RX8ggEX//eDGysKyA==
+Study Abroad - Canada: https://www.cuchd.in/studyabroad/
+Study Abroad - USA: https://www.cuchd.in/studyabroad/
+Study Abroad - Australia: https://www.cuchd.in/studyabroad/

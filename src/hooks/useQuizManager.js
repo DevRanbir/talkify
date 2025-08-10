@@ -1,5 +1,4 @@
 import { useState, useCallback, useRef } from 'react';
-import TalkifyAPI from '../services/TalkifyAPI';
 import voiceChatService from '../services/VoiceChatService';
 import talkifyAPI from '../services/TalkifyAPI';
 
@@ -61,8 +60,9 @@ export const useQuizManager = () => {
         
         setChatMessages(prev => [...prev, questionMessage]);
         
-        // Speak the initial question
-        voiceChatService.speakAIMessage(response.question.question);
+        // Queue both messages to speak sequentially
+        await voiceChatService.queueSpeak(response.welcomeMessage.text);
+        await voiceChatService.queueSpeak(response.question.question);
         
         // Update action buttons
         const buttons = talkifyAPI.formatQuestionAsButtons(response.question);
@@ -133,7 +133,7 @@ export const useQuizManager = () => {
         setChatMessages(prev => [...prev, recommendationMessage]);
         
         // Speak the recommendation message
-        voiceChatService.speakAIMessage(recommendationMessage.text);
+        await voiceChatService.speakAIMessage(recommendationMessage.text);
         
         // Update progress to 100%
         setProgress({
@@ -158,7 +158,7 @@ export const useQuizManager = () => {
         setChatMessages(prev => [...prev, nextQuestionMessage]);
         
         // Speak the next question
-        voiceChatService.speakAIMessage(response.nextQuestion.question.question);
+        await voiceChatService.speakAIMessage(response.nextQuestion.question.question);
         
         // Update action buttons
         const buttons = talkifyAPI.formatQuestionAsButtons(response.nextQuestion.question);

@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     
     # Groq API
     groq_api_key: str = os.getenv("GROQ_API_KEY", "")
+    groq_api_key2: str = os.getenv("GROQ_API_KEY2", "")
     
     # Application settings
     max_questions: int = int(os.getenv("MAX_QUESTIONS", 15))

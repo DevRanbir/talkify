@@ -762,12 +762,141 @@
   width: 100%;
   height: 100%;
   z-index: 0;
+  transition: opacity 0.8s ease-in-out;
+}
+
+.spline-background.fade-in {
+  opacity: 1;
+}
+
+.spline-background.fade-out {
+  opacity: 0;
 }
 
 .spline-background spline-viewer {
   width: 100%;
   height: 100%;
   border-radius: 20px;
+}
+
+/* Video Overlay Styles */
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  background: var(--bg-primary);
+  transition: opacity 0.8s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.video-overlay.fade-in {
+  opacity: 1;
+}
+
+.video-overlay.fade-out {
+  opacity: 0;
+}
+
+.recommendation-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+  background: var(--bg-secondary);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Hide video controls completely */
+.recommendation-video::-webkit-media-controls {
+  display: none !important;
+}
+
+.recommendation-video::-webkit-media-controls-panel {
+  display: none !important;
+}
+
+.recommendation-video::-webkit-media-controls-play-button {
+  display: none !important;
+}
+
+.recommendation-video::-webkit-media-controls-timeline {
+  display: none !important;
+}
+
+.recommendation-video::-webkit-media-controls-current-time-display {
+  display: none !important;
+}
+
+.recommendation-video::-webkit-media-controls-time-remaining-display {
+  display: none !important;
+}
+
+.recommendation-video::-webkit-media-controls-mute-button {
+  display: none !important;
+}
+
+.recommendation-video::-webkit-media-controls-volume-slider {
+  display: none !important;
+}
+
+.recommendation-video::-webkit-media-controls-fullscreen-button {
+  display: none !important;
+}
+
+/* Firefox */
+.recommendation-video::-moz-media-controls {
+  display: none !important;
+}
+
+/* IE/Edge */
+.recommendation-video::-ms-media-controls {
+  display: none !important;
+}
+
+/* Disable right-click context menu */
+.recommendation-video {
+  pointer-events: none;
+}
+
+.video-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--text-primary);
+  z-index: 2;
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2rem;
+  border-radius: 15px;
+  border: 1px solid var(--border-color);
+}
+
+.video-loading .loading-spinner {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  animation: pulse 2s infinite;
+}
+
+.video-loading p {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
 }
 
 .main-content-overlay {
@@ -2736,5 +2865,165 @@ input:disabled + .toggle-slider {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+/* Rate Limit Warning Styles */
+.rate-limit-warning {
+  background: linear-gradient(135deg, #ff6b6b, #ff5252) !important;
+  border: 2px solid #ff4757 !important;
+  color: white;
+  margin-bottom: 0 !important; /* Remove margin when it's the only element */
+}
+
+/* When rate limited and only warning is shown, center it and make it the focus */
+.voice-settings-modern.rate-limited .voice-settings-content {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.voice-settings-modern.rate-limited .rate-limit-warning {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.warning-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  text-align: center;
+}
+
+.warning-icon {
+  font-size: 3rem;
+  flex-shrink: 0;
+  margin-bottom: 0.5rem;
+}
+
+.warning-text {
+  flex: 1;
+}
+
+.warning-text h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: white;
+}
+
+.warning-text p {
+  margin: 0 0 1.5rem 0;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.5;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.retry-tts-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-width: 200px;
+  margin: 0 auto;
+}
+
+.retry-tts-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.retry-tts-btn:active {
+  transform: translateY(0);
+}
+
+/* Disabled state for controls when rate limited */
+.voice-settings-modern.rate-limited .controls-group .control-item:not(.retry-control) {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.voice-settings-modern.rate-limited .toggle-switch input {
+  cursor: not-allowed;
+}
+
+.voice-settings-modern.rate-limited .model-option,
+.voice-settings-modern.rate-limited .voice-option {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.voice-settings-modern.rate-limited .stop-btn {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* Rate limited indicator for utility button */
+.utility-button.rate-limited {
+  background: linear-gradient(135deg, #ff6b6b, #ff5252) !important;
+  color: white !important;
+  border: 2px solid #ff4757 !important;
+  animation: pulse-warning 2s infinite;
+}
+
+.rate-limit-indicator {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ff4757;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  border: 2px solid white;
+  animation: bounce-warning 1s infinite;
+}
+
+@keyframes pulse-warning {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 8px rgba(255, 71, 87, 0);
+  }
+}
+
+@keyframes bounce-warning {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-4px);
+  }
+  60% {
+    transform: translateY(-2px);
   }
 }

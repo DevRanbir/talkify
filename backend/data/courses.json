@@ -2,7 +2,7 @@
   {
     "name": "B.E. Aerospace Engineering",
     "link": "https://www.cuchd.in/engineering/be-aerospace.php",
-    "tags": ["aerospace", "engineering", "physics", "mechanics"],
+    "tags": ["aerospace", "engineering", "physics", "mechanics", "aviation"],
     "description": "Focuses on design, development, and testing of aircraft and spacecraft systems.",
     "provider": "Chandigarh University",
     "duration": "4 years",
@@ -11,8 +11,8 @@
   {
     "name": "B.E. Automobile Engineering",
     "link": "https://www.cuchd.in/engineering/be-automobile-engineering.php",
-    "tags": ["automobile", "mechanical", "vehicles", "engineering"],
-    "description": "Covers vehicle engineering including design, manufacturing, and operation of automobiles.",
+    "tags": ["automobile", "automotive", "engineering", "vehicles", "mechanical"],
+    "description": "Specializes in design, manufacturing, and maintenance of automobiles and automotive systems.",
     "provider": "Chandigarh University",
     "duration": "4 years",
     "level": "Undergraduate"
@@ -20,8 +20,8 @@
   {
     "name": "B.E. BioTechnology Engineering",
     "link": "https://www.cuchd.in/engineering/be-biotechnology.php",
-    "tags": ["biotechnology", "engineering", "biology", "genetics"],
-    "description": "Applies biology and technology in medical, agricultural, and environmental fields.",
+    "tags": ["biotechnology", "engineering", "biology", "genetics", "research"],
+    "description": "Combines engineering principles with biological sciences for medical and industrial applications.",
     "provider": "Chandigarh University",
     "duration": "4 years",
     "level": "Undergraduate"
@@ -29,8 +29,8 @@
   {
     "name": "B.E. Chemical Engineering",
     "link": "https://www.cuchd.in/engineering/be-chemical-engineering.php",
-    "tags": ["chemical", "engineering", "chemistry", "process"],
-    "description": "Deals with design and operation of chemical processes and industrial plants.",
+    "tags": ["chemical", "engineering", "chemistry", "process", "industrial"],
+    "description": "Applies chemistry, physics, and math to solve problems involving chemical processes.",
     "provider": "Chandigarh University",
     "duration": "4 years",
     "level": "Undergraduate"
@@ -38,8 +38,8 @@
   {
     "name": "B.E. Civil Engineering",
     "link": "https://www.cuchd.in/engineering/be-civil-engineering.php",
-    "tags": ["civil", "construction", "infrastructure", "engineering"],
-    "description": "Focuses on construction, design, and maintenance of the built environment.",
+    "tags": ["civil", "engineering", "construction", "infrastructure", "structural"],
+    "description": "Focuses on design and construction of infrastructure including buildings, roads, and bridges.",
     "provider": "Chandigarh University",
     "duration": "4 years",
     "level": "Undergraduate"
@@ -47,8 +47,8 @@
   {
     "name": "B.E. Computer Science & Engineering",
     "link": "https://www.cuchd.in/engineering/be-computer-science-engineering.php",
-    "tags": ["computer science", "software", "programming", "IT"],
-    "description": "Core computer science program covering software, algorithms, and systems.",
+    "tags": ["computer science", "engineering", "programming", "software", "technology","General"],
+    "description": "Combines computer science theory with engineering principles for software and hardware development.",
     "provider": "Chandigarh University",
     "duration": "4 years",
     "level": "Undergraduate"
@@ -56,26 +56,26 @@
   {
     "name": "B.E. Electrical Engineering",
     "link": "https://www.cuchd.in/engineering/be-electrical-engineering.php",
-    "tags": ["electrical", "power systems", "circuits", "engineering"],
-    "description": "Focuses on electrical systems, machines, and energy management.",
+    "tags": ["electrical", "engineering", "electronics", "power", "circuits"],
+    "description": "Deals with electrical systems, electronics, and electromagnetic applications.",
     "provider": "Chandigarh University",
     "duration": "4 years",
     "level": "Undergraduate"
   },
   {
-    "name": "Bachelor of Engineering (Hons.) Computer Science & Engineering (Artificial Intelligence) in Collaboration with Microsoft",
+    "name": "Bachelor of Engineering (Hons.) Computer Science & Engineering (Artificial Intelligence) with Microsoft",
     "link": "https://www.cuchd.in/engineering/be-cse-artificial-intelligence.php",
-    "tags": ["AI", "computer science", "microsoft", "machine learning"],
-    "description": "Specialized program in AI and ML in collaboration with Microsoft.",
-    "provider": "Chandigarh University with Microsoft",
+    "tags": ["computer science", "AI", "artificial intelligence", "Microsoft", "machine learning"],
+    "description": "Specialized program in AI and machine learning with Microsoft collaboration and industry exposure.",
+    "provider": "Chandigarh University",
     "duration": "4 years",
     "level": "Undergraduate"
   },
   {
     "name": "B.E. Electronics and Communication Engineering",
     "link": "https://www.cuchd.in/engineering/be-electronics-communication-engineering.php",
-    "tags": ["electronics", "communication", "engineering", "circuit design"],
-    "description": "Combines electronics with telecommunication systems and embedded devices.",
+    "tags": ["electronics", "communication", "engineering", "telecommunications", "signals"],
+    "description": "Focuses on electronic devices, communication systems, and signal processing technologies.",
     "provider": "Chandigarh University",
     "duration": "4 years",
     "level": "Undergraduate"
@@ -83,8 +83,8 @@
   {
     "name": "B.E. Information Technology Engineering",
     "link": "https://www.cuchd.in/engineering/be-information-technology.php",
-    "tags": ["IT", "software", "networking", "security"],
-    "description": "Focuses on managing and processing information using computing technologies.",
+    "tags": ["information technology", "IT", "engineering", "software", "networks"],
+    "description": "Specializes in IT systems, software development, and information management technologies.",
     "provider": "Chandigarh University",
     "duration": "4 years",
     "level": "Undergraduate"
@@ -92,8 +92,8 @@
   {
     "name": "B.E. Mechanical Engineering",
     "link": "https://www.cuchd.in/engineering/be-mechanical-engineering.php",
-    "tags": ["mechanical", "design", "manufacturing", "thermal"],
-    "description": "Deals with machines, engines, robotics, and thermal systems.",
+    "tags": ["mechanical", "engineering", "machines", "manufacturing", "design"],
+    "description": "Covers design, manufacturing, and maintenance of mechanical systems and machinery.",
     "provider": "Chandigarh University",
     "duration": "4 years",
     "level": "Undergraduate"
@@ -101,8 +101,8 @@
   {
     "name": "B.E. Mechatronics Engineering",
     "link": "https://www.cuchd.in/engineering/be-mechatronics.php",
-    "tags": ["mechatronics", "robotics", "automation", "engineering"],
-    "description": "Integrates mechanical, electronics, computer, and control engineering.",
+    "tags": ["mechatronics", "engineering", "robotics", "automation", "mechanical"],
+    "description": "Integrates mechanical, electrical, and computer engineering for automated systems.",
     "provider": "Chandigarh University",
     "duration": "4 years",
     "level": "Undergraduate"
@@ -110,19 +110,703 @@
   {
     "name": "B.E. Food Technology Engineering",
     "link": "https://www.cuchd.in/engineering/be-food-technology.php",
-    "tags": ["food technology", "engineering", "processing", "quality"],
-    "description": "Focuses on food processing, preservation, and safety systems.",
+    "tags": ["food technology", "engineering", "food processing", "nutrition", "safety"],
+    "description": "Applies engineering principles to food processing, preservation, and safety technologies.",
     "provider": "Chandigarh University",
     "duration": "4 years",
     "level": "Undergraduate"
   },
   {
-    "name": "Bachelor of Engineering (Computer Science and Engineering) (with Specialization in Full Stack Development)",
+    "name": "Bachelor of Engineering (Computer Science and Engineering) with Specialization in Full Stack Development",
     "link": "https://www.cuchd.in/engineering/be-cse-full-stack-development.php",
-    "tags": ["full stack", "web development", "frontend", "backend"],
-    "description": "Specialized track in computer science focused on full stack development.",
+    "tags": ["computer science", "full stack", "web development", "programming", "software"],
+    "description": "Specialized CSE program focusing on full-stack web development and modern programming technologies.",
     "provider": "Chandigarh University",
     "duration": "4 years",
     "level": "Undergraduate"
+  },
+  {
+    "name": "M.E. Automobile Engineering",
+    "link": "https://www.cuchd.in/engineering/me-automobile-engineering.php",
+    "tags": ["automobile", "engineering", "postgraduate", "automotive", "research"],
+    "description": "Advanced studies in automotive engineering with research focus on vehicle technologies.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "M.E. Computer Science & Engineering",
+    "link": "https://www.cuchd.in/engineering/me-computer-science-engineering.php",
+    "tags": ["computer science", "engineering", "postgraduate", "research", "advanced"],
+    "description": "Advanced computer science engineering program with research and specialization opportunities.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "M.E. Electronics and Communication Engineering",
+    "link": "https://www.cuchd.in/engineering/me-electronics-and-communication-engineering.php",
+    "tags": ["electronics", "communication", "engineering", "postgraduate", "telecommunications"],
+    "description": "Advanced program in electronics and communication with cutting-edge research opportunities.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "M.E. Electrical Engineering",
+    "link": "https://www.cuchd.in/engineering/me-electrical-engineering.php",
+    "tags": ["electrical", "engineering", "postgraduate", "power systems", "advanced"],
+    "description": "Advanced electrical engineering program focusing on power systems and electrical technologies.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "M.E. Mechanical Engineering",
+    "link": "https://www.cuchd.in/engineering/me-mechanical-engineering.php",
+    "tags": ["mechanical", "engineering", "postgraduate", "research", "advanced"],
+    "description": "Advanced mechanical engineering program with research focus on modern manufacturing technologies.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "M.E. CSE Artificial Intelligence and Machine Learning Engineering",
+    "link": "https://www.cuchd.in/engineering/me-artificial-intelligence-and-machine-learning.php",
+    "tags": ["AI", "machine learning", "computer science", "postgraduate", "research"],
+    "description": "Advanced program specializing in AI and machine learning technologies and research.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "M.E. Electrical Engineering - Electric Vehicles",
+    "link": "https://www.cuchd.in/engineering/me-electrical-engineering-electric-vehicles.php",
+    "tags": ["electrical", "electric vehicles", "EV", "sustainable", "automotive"],
+    "description": "Specialized program in electrical engineering focusing on electric vehicle technologies.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "M.E. Civil - Transportation Engineering",
+    "link": "https://www.cuchd.in/engineering/me-transportation-engineering.php",
+    "tags": ["civil", "transportation", "engineering", "infrastructure", "planning"],
+    "description": "Specialized civil engineering program focusing on transportation systems and infrastructure.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "M.E. Civil - Construction Technology and Management Engineering",
+    "link": "https://www.cuchd.in/engineering/me-ctm-engineering.php",
+    "tags": ["civil", "construction", "management", "technology", "project management"],
+    "description": "Advanced program in construction technology and project management for civil engineering.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "M.E. Civil - Structural Engineering",
+    "link": "https://www.cuchd.in/engineering/me-structural-engineering.php",
+    "tags": ["civil", "structural", "engineering", "design", "construction"],
+    "description": "Specialized program in structural analysis, design, and construction technologies.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "M.E. Civil - Geotechnical Engineering",
+    "link": "https://www.cuchd.in/engineering/me-geotechnical-engineering.php",
+    "tags": ["civil", "geotechnical", "soil", "foundation", "engineering"],
+    "description": "Advanced program in soil mechanics, foundation engineering, and geotechnical analysis.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "M.E. Civil - Environment Engineering",
+    "link": "https://www.cuchd.in/engineering/me-environment-engineering.php",
+    "tags": ["civil", "environmental", "engineering", "sustainability", "interdisciplinary"],
+    "description": "Interdisciplinary program focusing on environmental engineering and sustainable development.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "M.E. Robotics and Automation Engineering",
+    "link": "https://www.cuchd.in/engineering/me-robotics.php",
+    "tags": ["robotics", "automation", "engineering", "interdisciplinary", "AI"],
+    "description": "Interdisciplinary program in robotics and automation technologies for modern industries.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "M.E. Artificial Intelligence Engineering",
+    "link": "https://www.cuchd.in/engineering/me-artificial-intelligence.php",
+    "tags": ["artificial intelligence", "AI", "engineering", "interdisciplinary", "research"],
+    "description": "Interdisciplinary program specializing in artificial intelligence engineering and research.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "M.E. CSE Data Science Engineering",
+    "link": "https://www.cuchd.in/engineering/me-data-science.php",
+    "tags": ["data science", "computer science", "engineering", "analytics", "big data"],
+    "description": "Advanced program combining computer science with data science and analytics technologies.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "Doctorate of Philosophy (Electrical Engineering)",
+    "link": "https://www.cuchd.in/doctorate-programs/phd-electrical-engineering.php",
+    "tags": ["PhD", "electrical engineering", "research", "doctorate", "advanced"],
+    "description": "Doctoral research program in electrical engineering for advanced academic and research careers.",
+    "provider": "Chandigarh University",
+    "duration": "3-5 years",
+    "level": "Doctoral"
+  },
+  {
+    "name": "Doctorate of Philosophy (Mechanical Engineering)",
+    "link": "https://www.cuchd.in/doctorate-programs/phd-mechanical-engineering.php",
+    "tags": ["PhD", "mechanical engineering", "research", "doctorate", "advanced"],
+    "description": "Doctoral research program in mechanical engineering for advanced academic and research careers.",
+    "provider": "Chandigarh University",
+    "duration": "3-5 years",
+    "level": "Doctoral"
+  },
+  {
+    "name": "Doctorate of Philosophy (Computer Science Engineering)",
+    "link": "https://www.cuchd.in/doctorate-programs/phd-computer-science.php",
+    "tags": ["PhD", "computer science", "engineering", "research", "doctorate"],
+    "description": "Doctoral research program in computer science engineering for advanced academic careers.",
+    "provider": "Chandigarh University",
+    "duration": "3-5 years",
+    "level": "Doctoral"
+  },
+  {
+    "name": "Doctorate of Philosophy (Civil Engineering)",
+    "link": "https://www.cuchd.in/doctorate-programs/phd-civil-engineering.php",
+    "tags": ["PhD", "civil engineering", "research", "doctorate", "infrastructure"],
+    "description": "Doctoral research program in civil engineering for advanced academic and research careers.",
+    "provider": "Chandigarh University",
+    "duration": "3-5 years",
+    "level": "Doctoral"
+  },
+  {
+    "name": "Doctorate of Philosophy (Electronics & Communication Engineering)",
+    "link": "https://www.cuchd.in/doctorate-programs/phd-electronics-and-communication.php",
+    "tags": ["PhD", "electronics", "communication", "engineering", "research"],
+    "description": "Doctoral research program in electronics and communication engineering for advanced careers.",
+    "provider": "Chandigarh University",
+    "duration": "3-5 years",
+    "level": "Doctoral"
+  },
+  {
+    "name": "Management (BBA/MBA)",
+    "link": "https://www.cuchd.in/management/",
+    "tags": ["management", "business", "administration", "leadership"],
+    "description": "Business administration and management programs for undergraduate and postgraduate levels.",
+    "provider": "Chandigarh University",
+    "duration": "3-2 years",
+    "level": "Undergraduate/Postgraduate"
+  },
+  {
+    "name": "Industry Collaborated (BBA/MBA)",
+    "link": "https://www.cuchd.in/apex-management/",
+    "tags": ["management", "industry", "collaboration", "business"],
+    "description": "Industry-integrated business programs with real-world exposure and partnerships.",
+    "provider": "Chandigarh University",
+    "duration": "3-2 years",
+    "level": "Undergraduate/Postgraduate"
+  },
+  {
+    "name": "Computing (BCA/MCA)",
+    "link": "https://www.cuchd.in/computing/",
+    "tags": ["computing", "computer science", "programming", "software"],
+    "description": "Computer applications and programming courses for technical careers in IT.",
+    "provider": "Chandigarh University",
+    "duration": "3-2 years",
+    "level": "Undergraduate/Postgraduate"
+  },
+  {
+    "name": "Airlines & Airport Management",
+    "link": "https://www.cuchd.in/hotel-management-and-tourism/bsc-airline-and-airport-management.php",
+    "tags": ["aviation", "airport", "management", "travel"],
+    "description": "Specialized program in airline operations and airport management systems.",
+    "provider": "Chandigarh University",
+    "duration": "3 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Allied Health Sciences",
+    "link": "https://www.cuchd.in/applied-health-sciences/",
+    "tags": ["health", "medical", "healthcare", "sciences"],
+    "description": "Healthcare support programs covering various allied health professions.",
+    "provider": "Chandigarh University",
+    "duration": "3-4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Animation & Multimedia",
+    "link": "https://www.cuchd.in/animation-and-multimedia/",
+    "tags": ["animation", "multimedia", "graphics", "design", "visual arts"],
+    "description": "Creative programs in animation, multimedia design, and digital arts.",
+    "provider": "Chandigarh University",
+    "duration": "3 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Architecture",
+    "link": "https://www.cuchd.in/architecture-and-design/",
+    "tags": ["architecture", "design", "construction", "planning"],
+    "description": "Professional architecture and design programs for building and space planning.",
+    "provider": "Chandigarh University",
+    "duration": "5 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Arts & Humanities (B.A & M.A)",
+    "link": "https://www.cuchd.in/liberal-arts-and-humanities/",
+    "tags": ["arts", "humanities", "literature", "social sciences"],
+    "description": "Liberal arts and humanities programs exploring culture, society, and human expression.",
+    "provider": "Chandigarh University",
+    "duration": "3-2 years",
+    "level": "Undergraduate/Postgraduate"
+  },
+  {
+    "name": "Basic Sciences (Physics/Chemistry/Maths)",
+    "link": "https://www.cuchd.in/basic-sciences/",
+    "tags": ["science", "physics", "chemistry", "mathematics", "research"],
+    "description": "Fundamental science programs in physics, chemistry, and mathematics.",
+    "provider": "Chandigarh University",
+    "duration": "3 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Biotechnology & Biosciences",
+    "link": "https://www.cuchd.in/biotechnology/",
+    "tags": ["biotechnology", "biology", "biosciences", "research"],
+    "description": "Advanced programs in biotechnology and biological sciences research.",
+    "provider": "Chandigarh University",
+    "duration": "3-4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "B.Sc. Medical",
+    "link": "https://www.cuchd.in/biosciences/bsc-medical.php",
+    "tags": ["medical", "healthcare", "biology", "science"],
+    "description": "Medical science program providing foundation for healthcare careers.",
+    "provider": "Chandigarh University",
+    "duration": "3 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Commerce (B.Com/M.Com)",
+    "link": "https://www.cuchd.in/commerce/",
+    "tags": ["commerce", "business", "accounting", "finance"],
+    "description": "Commercial and business studies covering accounting, finance, and trade.",
+    "provider": "Chandigarh University",
+    "duration": "3-2 years",
+    "level": "Undergraduate/Postgraduate"
+  },
+  {
+    "name": "Travel and Tourism",
+    "link": "https://www.cuchd.in/hotel-management-and-tourism/bsc-travel-and-tourism-management.php",
+    "tags": ["tourism", "travel", "hospitality", "management"],
+    "description": "Tourism management program for travel and hospitality industry careers.",
+    "provider": "Chandigarh University",
+    "duration": "3 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Culinary Sciences",
+    "link": "https://www.cuchd.in/hotel-management-and-tourism/bsc-culinary-arts.php",
+    "tags": ["culinary", "cooking", "food", "hospitality"],
+    "description": "Professional culinary arts program for food service and hospitality careers.",
+    "provider": "Chandigarh University",
+    "duration": "3 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Data Science",
+    "link": "https://www.cuchd.in/basic-sciences/msc-data-sciences.php",
+    "tags": ["data science", "analytics", "statistics", "machine learning"],
+    "description": "Advanced data science program covering analytics, statistics, and machine learning.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "Economics",
+    "link": "https://www.cuchd.in/economics/",
+    "tags": ["economics", "finance", "policy", "analysis"],
+    "description": "Economic theory and analysis program for policy and financial careers.",
+    "provider": "Chandigarh University",
+    "duration": "3 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Education (B.A.B.Ed/ B.Sc.B.Ed)",
+    "link": "https://www.cuchd.in/teachers-training-and-research/",
+    "tags": ["education", "teaching", "training", "pedagogy"],
+    "description": "Teacher training and education programs for academic careers.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Fashion & Design",
+    "link": "https://www.cuchd.in/design/bachelor-of-design-fashion.php",
+    "tags": ["fashion", "design", "textiles", "styling"],
+    "description": "Fashion design program covering clothing design, textiles, and fashion industry.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Finance & Accounting",
+    "link": "https://www.cuchd.in/finance-and-accounting",
+    "tags": ["finance", "accounting", "taxation", "audit"],
+    "description": "Professional finance and accounting programs for financial careers.",
+    "provider": "Chandigarh University",
+    "duration": "3 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Fine Arts",
+    "link": "https://www.cuchd.in/design/fine-arts.php",
+    "tags": ["fine arts", "painting", "sculpture", "visual arts"],
+    "description": "Traditional and contemporary fine arts program for creative expression.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Forensic Sciences (B.Sc./M.Sc.)",
+    "link": "https://www.cuchd.in/applied-health-sciences/",
+    "tags": ["forensic", "science", "investigation", "criminal justice"],
+    "description": "Forensic science programs for criminal investigation and legal careers.",
+    "provider": "Chandigarh University",
+    "duration": "3-2 years",
+    "level": "Undergraduate/Postgraduate"
+  },
+  {
+    "name": "Hotel & Hospitality Management",
+    "link": "https://www.cuchd.in/hotel-management-and-tourism/bsc-hotel-and-hospitality-management.php",
+    "tags": ["hospitality", "hotel", "management", "service"],
+    "description": "Hotel and hospitality management for service industry careers.",
+    "provider": "Chandigarh University",
+    "duration": "3 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Interior Design",
+    "link": "https://www.cuchd.in/design/bachelor-of-design-interior.php",
+    "tags": ["interior design", "space planning", "decoration", "architecture"],
+    "description": "Interior design program for residential and commercial space planning.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Legal Studies",
+    "link": "https://www.cuchd.in/legal-studies/",
+    "tags": ["law", "legal", "justice", "advocacy"],
+    "description": "Legal studies program for law and justice system careers.",
+    "provider": "Chandigarh University",
+    "duration": "5 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Mathematics (B.Sc./M.Sc./Phd)",
+    "link": "https://www.cuchd.in/basic-sciences/",
+    "tags": ["mathematics", "statistics", "research", "analytics"],
+    "description": "Mathematics programs from undergraduate to doctoral levels.",
+    "provider": "Chandigarh University",
+    "duration": "3-5 years",
+    "level": "Undergraduate/Postgraduate/Doctoral"
+  },
+  {
+    "name": "M.Sc. Zoology/Botany",
+    "link": "https://www.cuchd.in/biosciences/",
+    "tags": ["zoology", "botany", "biology", "research"],
+    "description": "Advanced biological sciences in zoology and botany research.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "Microbiology",
+    "link": "https://www.cuchd.in/biotechnology/msc-industrial-microbiology.php",
+    "tags": ["microbiology", "biology", "research", "industry"],
+    "description": "Industrial microbiology program for biotechnology and research careers.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "MBA Tourism, Hospitality and Aviation",
+    "link": "https://www.cuchd.in/management/MBA-tourism-and-hospitality-management.php",
+    "tags": ["MBA", "tourism", "hospitality", "aviation", "management"],
+    "description": "MBA specializing in tourism, hospitality, and aviation industry management.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "Media Studies",
+    "link": "https://www.cuchd.in/journalism-and-mass-communication/",
+    "tags": ["media", "journalism", "communication", "broadcasting"],
+    "description": "Journalism and mass communication program for media careers.",
+    "provider": "Chandigarh University",
+    "duration": "3 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Medical Lab Technology",
+    "link": "https://www.cuchd.in/applied-health-sciences/bsc-in-mlt.php",
+    "tags": ["medical", "laboratory", "technology", "healthcare"],
+    "description": "Medical laboratory technology program for diagnostic healthcare careers.",
+    "provider": "Chandigarh University",
+    "duration": "3 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Nutrition & Dietetics",
+    "link": "https://www.cuchd.in/applied-health-sciences/bsc-nutrition-dietetics.php",
+    "tags": ["nutrition", "dietetics", "health", "wellness"],
+    "description": "Nutrition and dietetics program for health and wellness careers.",
+    "provider": "Chandigarh University",
+    "duration": "3 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Optometry",
+    "link": "https://www.cuchd.in/applied-health-sciences/bachelor-of-optometry.php",
+    "tags": ["optometry", "eye care", "vision", "healthcare"],
+    "description": "Professional optometry program for eye care and vision health careers.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Pharma Sciences",
+    "link": "https://www.cuchd.in/pharma-sciences/",
+    "tags": ["pharmacy", "pharmaceutical", "medicine", "healthcare"],
+    "description": "Pharmaceutical sciences program for drug development and pharmacy careers.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Physiotherapy",
+    "link": "https://www.cuchd.in/applied-health-sciences/bachelor-of-physiotherapy.php",
+    "tags": ["physiotherapy", "rehabilitation", "healthcare", "therapy"],
+    "description": "Professional physiotherapy program for rehabilitation and therapeutic careers.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Product & Industrial Design",
+    "link": "https://www.cuchd.in/design/bachelor-of-design.php",
+    "tags": ["product design", "industrial design", "innovation", "engineering"],
+    "description": "Product and industrial design program for innovation and manufacturing careers.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "Psychology",
+    "link": "https://www.cuchd.in/liberal-arts-and-humanities/",
+    "tags": ["psychology", "mental health", "behavior", "counseling"],
+    "description": "Psychology program for mental health and behavioral science careers.",
+    "provider": "Chandigarh University",
+    "duration": "3 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "MCA Data Science with Intel",
+    "link": "https://www.cuchd.in/computing/mca-data-science.php",
+    "tags": ["MCA", "data science", "Intel", "computing", "analytics"],
+    "description": "Industry-partnered MCA program in data science with Intel collaboration.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "CSE with IBM",
+    "link": "https://www.cuchd.in/IBM/",
+    "tags": ["computer science", "IBM", "software", "technology"],
+    "description": "Computer Science Engineering program with IBM industry partnership.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "ME CSE Cloud Computing with Virtusa",
+    "link": "https://www.cuchd.in/engineering/virtusa-me-cse-cloud-computing.php",
+    "tags": ["ME", "computer science", "cloud computing", "Virtusa"],
+    "description": "Master's in Computer Science with cloud computing specialization and Virtusa partnership.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "CSE with TCS",
+    "link": "https://www.cuchd.in/TCS/",
+    "tags": ["computer science", "TCS", "software", "technology"],
+    "description": "Computer Science Engineering program with TCS industry partnership.",
+    "provider": "Chandigarh University",
+    "duration": "4 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "B.Com in Applied Finance & Accounting with Grant Thornton",
+    "link": "https://www.cuchd.in/finance-and-accounting/bcom-in-applied-finance-and-analytics-acca-gt.php",
+    "tags": ["B.Com", "finance", "accounting", "Grant Thornton", "ACCA"],
+    "description": "Commerce program in applied finance and accounting with Grant Thornton partnership.",
+    "provider": "Chandigarh University",
+    "duration": "3 years",
+    "level": "Undergraduate"
+  },
+  {
+    "name": "MBA Healthcare and Hospital Management",
+    "link": "https://www.cuchd.in/apex-management/mba-healthcare-and-life-sciences.php",
+    "tags": ["MBA", "healthcare", "hospital management", "life sciences"],
+    "description": "MBA specializing in healthcare and hospital management systems.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "MBA in Capital Markets with NISM",
+    "link": "https://www.cuchd.in/management/mba-capital-markets.php",
+    "tags": ["MBA", "capital markets", "NISM", "finance", "investment"],
+    "description": "MBA in capital markets with NISM certification and financial market expertise.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "MBA Strategic HR with AON",
+    "link": "https://www.cuchd.in/apex-management/mba-strategic-hr.php",
+    "tags": ["MBA", "HR", "human resources", "AON", "strategy"],
+    "description": "MBA in strategic human resources management with AON partnership.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "MBA Data Science & AI with SAS",
+    "link": "https://www.cuchd.in/apex-management/mba-data-science-and-artificial-intelligence.php",
+    "tags": ["MBA", "data science", "AI", "artificial intelligence", "SAS"],
+    "description": "MBA combining business management with data science and AI expertise through SAS partnership.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "MBA Business Analytics with IBM",
+    "link": "https://www.cuchd.in/IBM/MBA-business-analytics.php",
+    "tags": ["MBA", "business analytics", "IBM", "data analysis"],
+    "description": "MBA in business analytics with IBM industry collaboration and certification.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "MBA in Applied Finance with PwC",
+    "link": "https://www.cuchd.in/finance-and-accounting/mba-applied-finance.php",
+    "tags": ["MBA", "applied finance", "PwC", "financial management"],
+    "description": "MBA in applied finance with PricewaterhouseCoopers industry partnership.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "MBA with SBI",
+    "link": "https://www.cuchd.in/apex-management/bfe.php",
+    "tags": ["MBA", "SBI", "banking", "finance"],
+    "description": "MBA program with State Bank of India partnership for banking and finance careers.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "MBA Digital Marketing",
+    "link": "https://www.cuchd.in/apex-management/mba-master-of-business-digital-marketing.php",
+    "tags": ["MBA", "digital marketing", "online marketing", "social media"],
+    "description": "MBA specializing in digital marketing and online business strategies.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "MBA Fintech with NSE Academy",
+    "link": "https://www.cuchd.in/apex-management/mba-fintech.php",
+    "tags": ["MBA", "fintech", "NSE", "financial technology"],
+    "description": "MBA in financial technology with NSE Academy partnership for fintech careers.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "MBA Logistics and Supply Chain Management with CII",
+    "link": "https://www.cuchd.in/apex-management/MBA-logistics-and-supply-chain-management.php",
+    "tags": ["MBA", "logistics", "supply chain", "CII", "operations"],
+    "description": "MBA in logistics and supply chain management with CII industry collaboration.",
+    "provider": "Chandigarh University",
+    "duration": "2 years",
+    "level": "Postgraduate"
+  },
+  {
+    "name": "Doctor of Philosophy",
+    "link": "https://www.cuchd.in/doctorate-programs/",
+    "tags": ["PhD", "doctorate", "research", "academic"],
+    "description": "Doctoral programs across various disciplines for advanced research and academic careers.",
+    "provider": "Chandigarh University",
+    "duration": "3-5 years",
+    "level": "Doctoral"
+  },
+  {
+    "name": "Ph.D Admissions",
+    "link": "https://www.cuchd.in/phd-me-admissions/ApplicationRegistration.aspx?Subject=fJAt3RX8ggEX//eDGysKyA==",
+    "tags": ["PhD", "admissions", "research", "application"],
+    "description": "PhD admission process and application portal for doctoral research programs.",
+    "provider": "Chandigarh University",
+    "duration": "3-5 years",
+    "level": "Doctoral"
+  },
+  {
+    "name": "Study Abroad - Canada",
+    "link": "https://www.cuchd.in/studyabroad/",
+    "tags": ["study abroad", "Canada", "international", "education"],
+    "description": "International education opportunities and programs in Canada.",
+    "provider": "Chandigarh University",
+    "duration": "Variable",
+    "level": "Various"
+  },
+  {
+    "name": "Study Abroad - USA",
+    "link": "https://www.cuchd.in/studyabroad/",
+    "tags": ["study abroad", "USA", "international", "education"],
+    "description": "International education opportunities and programs in the United States.",
+    "provider": "Chandigarh University",
+    "duration": "Variable",
+    "level": "Various"
+  },
+  {
+    "name": "Study Abroad - Australia",
+    "link": "https://www.cuchd.in/studyabroad/",
+    "tags": ["study abroad", "Australia", "international", "education"],
+    "description": "International education opportunities and programs in Australia.",
+    "provider": "Chandigarh University",
+    "duration": "Variable",
+    "level": "Various"
   }
 ]

@@ -78,6 +78,36 @@ async def get_api_key():
             detail=f"Error fetching API key: {str(e)}"
         )
 
+@app.get("/key2")
+async def get_api_key2():
+    """
+    Get the second Groq API key for frontend TTS functionality
+    
+    Returns:
+        Second API key for Groq service
+    """
+    try:
+        settings = get_settings()
+        
+        if not settings.groq_api_key2:
+            raise HTTPException(
+                status_code=500,
+                detail="Second API key not configured"
+            )
+        
+        return {
+            "api_key": settings.groq_api_key2,
+            "status": "success"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error fetching second API key: {str(e)}"
+        )
+
 if __name__ == "__main__":
     # Run the application
     uvicorn.run(
