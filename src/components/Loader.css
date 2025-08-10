@@ -38,7 +38,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
 }
 
 /* Size variants */
@@ -108,8 +107,6 @@
 /* Center Logo */
 .loader-logo {
   position: absolute;
-  top: 50%;
-  left: 50%;
   transform: translate(-50%, -50%);
   color: var(--accent-color);
   animation: pulse 2s ease-in-out infinite;
@@ -140,7 +137,6 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 0.5rem;
   display: block;
 }
 

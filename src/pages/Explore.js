@@ -13,12 +13,14 @@ const Explore = () => {
   const [userData, setUserData] = useState(null);
   const [showExitWarning, setShowExitWarning] = useState(false);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [showShowcase, setShowShowcase] = useState(true);
   const [isChatExpanded, setIsChatExpanded] = useState(false);
   const [localChatMessages, setLocalChatMessages] = useState([]);
   const [chatSessionId, setChatSessionId] = useState(null);
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatError, setChatError] = useState(null);
   const [voiceSettings, setVoiceSettings] = useState(voiceChatService.getVoiceSettings());
+  const [availableModels] = useState(voiceChatService.getAvailableModels());
   const chatMessagesRef = useRef(null);
   
   // Use the quiz manager hook
@@ -92,21 +94,27 @@ const Explore = () => {
     }
   }, [progress, isQuizActive, isQuizComplete]);
 
+  // Show showcase when quiz completes and data is available
+  useEffect(() => {
+    if (isQuizComplete && showcaseData) {
+      setShowShowcase(true);
+      console.log('🎯 Quiz completed! Showing course recommendation:', showcaseData);
+    }
+  }, [isQuizComplete, showcaseData]);
+
   // Auto-scroll chat messages when new messages are added
   useEffect(() => {
-    if (chatMessagesRef.current && localChatMessages.length > 0) {
-      chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+    if (chatMessagesRef.current) {
+      // For regular chat (expanded), scroll to bottom (normal behavior)
+      if (isChatExpanded && localChatMessages.length > 0) {
+        chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+      }
+      // For career guidance (collapsed quiz), scroll to top (reversed order)
+      else if (!isChatExpanded && (isQuizActive || isQuizComplete) && chatMessages.length > 0) {
+        chatMessagesRef.current.scrollTop = 0;
+      }
     }
-  }, [localChatMessages]);
-
-  // Update voice settings periodically to reflect speaking status
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVoiceSettings(voiceChatService.getVoiceSettings());
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, []);
+  }, [localChatMessages, chatMessages, isChatExpanded, isQuizActive, isQuizComplete]);
 
   const handleActionClick = async (action) => {
     console.log('🎬 Action clicked:', action, 'Loading state:', isLoading);
@@ -217,6 +225,7 @@ const Explore = () => {
           // Reset quiz and clear any session data
           resetQuiz();
           setIsChatExpanded(false); // Collapse chat on reset
+          setShowShowcase(true); // Reset showcase visibility
           console.log("Session reset successfully!");
           hideLoader("reset");
         }, 1000);
@@ -333,6 +342,16 @@ const Explore = () => {
     voiceChatService.setAutoSpeak(newSettings.autoSpeak);
   };
 
+  const handleModelChange = (model) => {
+    voiceChatService.setTTSModel(model);
+    setVoiceSettings(voiceChatService.getVoiceSettings());
+  };
+
+  const handleVoiceChange = (voice) => {
+    voiceChatService.setTTSVoice(voice);
+    setVoiceSettings(voiceChatService.getVoiceSettings());
+  };
+
   const stopSpeaking = () => {
     voiceChatService.stopSpeaking();
   };
@@ -346,38 +365,6 @@ const Explore = () => {
             <div className="chat-header">
               <h3>Chat Assistant</h3>
               <div className="chat-controls">
-                {/* Voice Controls */}
-                {voiceSettings.isAvailable && (
-                  <div className="voice-controls">
-                    <button 
-                      className={`voice-toggle-btn ${voiceSettings.isVoiceEnabled ? 'active' : ''}`}
-                      onClick={toggleVoice}
-                      title={voiceSettings.isVoiceEnabled ? "Disable Voice" : "Enable Voice"}
-                    >
-                      🔊
-                    </button>
-                    {voiceSettings.isVoiceEnabled && (
-                      <>
-                        <button 
-                          className={`auto-speak-btn ${voiceSettings.autoSpeak ? 'active' : ''}`}
-                          onClick={toggleAutoSpeak}
-                          title={voiceSettings.autoSpeak ? "Disable Auto-speak" : "Enable Auto-speak"}
-                        >
-                          🔄
-                        </button>
-                        {voiceChatService.isSpeaking() && (
-                          <button 
-                            className="stop-speaking-btn"
-                            onClick={stopSpeaking}
-                            title="Stop Speaking"
-                          >
-                            ⏹️
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
                 {isChatExpanded && (
                   <button 
                     className="collapse-chat-button" 
@@ -399,17 +386,46 @@ const Explore = () => {
               )}
               {(isChatExpanded ? localChatMessages : chatMessages).length > 0 ? (
                 <>
-                  {(isChatExpanded ? localChatMessages : chatMessages).map((message) => (
-                    <div
-                      key={message.id}
-                      className={`message ${message.sender === 'user' ? 'user-message' : 'bot-message'} ${message.isError ? 'error-message' : ''}`}
-                    >
+                  {/* Show loading indicator first for career guidance (reverse order) */}
+                  {isChatLoading && !isChatExpanded && (isQuizActive || isQuizComplete) && (
+                    <div className="message bot-message loading-message">
                       <div className="message-content">
-                        <p>{message.text}</p>
-                        <span className="message-time">{message.timestamp}</span>
+                        <p>
+                          <span className="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                          </span>
+                          AI is typing...
+                        </p>
                       </div>
                     </div>
-                  ))}
+                  )}
+                  
+                  {/* Messages display logic - reverse for career guidance, normal for chat */}
+                  {(() => {
+                    const messagesToShow = isChatExpanded ? localChatMessages : chatMessages;
+                    const isCareerGuidance = !isChatExpanded && (isQuizActive || isQuizComplete);
+                    
+                    // For career guidance, reverse the order (newest first)
+                    const orderedMessages = isCareerGuidance 
+                      ? [...messagesToShow].reverse() 
+                      : messagesToShow;
+                    
+                    return orderedMessages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`message ${message.sender === 'user' ? 'user-message' : 'bot-message'} ${message.isError ? 'error-message' : ''}`}
+                      >
+                        <div className="message-content">
+                          <p>{message.text}</p>
+                          <span className="message-time">{message.timestamp}</span>
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                  
+                  {/* Show loading indicator at bottom for regular chat (normal order) */}
                   {isChatLoading && isChatExpanded && (
                     <div className="message bot-message loading-message">
                       <div className="message-content">
@@ -567,10 +583,6 @@ const Explore = () => {
                 </span>
               </div>
             </div>
-            <div className="user-status">
-              <span className="status-indicator">●</span>
-              <span className="status-text">Active</span>
-            </div>
           </div>
         </div>
 
@@ -623,38 +635,122 @@ const Explore = () => {
           </div>
         </div>
 
-        {/* Div 6 - Step Indicator */}
+        {/* Div 6 - Dynamic Info Panel */}
         <div className="explore-div div6">
-          <div className="step-indicator-container">
-            <div className="step-indicator">
-              {steps.map((step, index) => (
-                <React.Fragment key={step.id}>
-                  <div className={`step ${step.status === 'active' ? 'active' : 'inactive'}`}>
-                    <div 
-                      className={`step-circle ${step.status}`}
-                      title={step.label}
-                      style={{ userSelect: 'none' }}
-                    >
-                      {step.status === 'completed' ? '✓' : step.id}
-                    </div>
-                    <span className={`step-label ${step.status}`}>
-                      {step.label}
-                    </span>
+          {(() => {
+            // Both chat and career guidance active
+            if (isChatExpanded && (isQuizActive || isQuizComplete)) {
+              return (
+                <div className="dual-mode-info">
+                  <div className="mode-indicator">
+                    <div className="mode-icon">🔄</div>
+                    <span className="mode-text">Multi-Mode Active</span>
                   </div>
-                  {index < steps.length - 1 && (
-                    <div className={`step-connector ${
-                      step.status === 'completed' ? 'completed' : 
-                      step.status === 'active' ? 'active' : ''
-                    }`}></div>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
+                  <div className="mode-stats">
+                    <div className="mode-stat">
+                      <span className="stat-value">CHAT</span>
+                      <span className="stat-desc">{localChatMessages.length} msgs</span>
+                    </div>
+                    <div className="mode-stat">
+                      <span className="stat-value">QUIZ</span>
+                      <span className="stat-desc">Step {progress.currentStep}</span>
+                    </div>
+                  </div>
+                  <div className="mode-actions">
+                    <button 
+                      className="mode-action-btn"
+                      onClick={() => setShowVoiceSettings(true)}
+                      title="Voice Settings"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 1c-1.66 0-3 1.34-3 3v8c0 1.66 1.34 3 3 3s3-1.34 3-3V4c0-1.66-1.34-3-3-3z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+            
+            // Only chat active
+            if (isChatExpanded) {
+              return (
+                <div className="chat-info-strip">
+                  <div className="chat-status-section">
+                    <div className="status-indicator">
+                      <span className="status-text">
+                        {isChatLoading ? 'AI Thinking...' : 'Chat Active'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="chat-stats-section">
+                    <div className="stat-item">
+                      <span className="stat-number">{localChatMessages.length}</span>
+                      <span className="stat-label">MESSAGES</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-number">{chatSessionId ? '1' : '0'}</span>
+                      <span className="stat-label">SESSION</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-number">{voiceSettings.isVoiceEnabled ? 'ON' : 'OFF'}</span>
+                      <span className="stat-label">VOICE</span>
+                    </div>
+                  </div>
+
+                </div>
+              );
+            }
+            
+            // Only career guidance active
+            if (isQuizActive || isQuizComplete) {
+              return (
+                <div className="step-indicator-container">
+                  <div className="step-indicator">
+                    {steps.map((step, index) => (
+                      <React.Fragment key={step.id}>
+                        <div className={`step ${step.status === 'active' ? 'active' : 'inactive'}`}>
+                          <div 
+                            className={`step-circle ${step.status}`}
+                            title={step.label}
+                            style={{ userSelect: 'none' }}
+                          >
+                            {step.status === 'completed' ? '✓' : step.id}
+                          </div>
+                          <span className={`step-label ${step.status}`}>
+                            {step.label}
+                          </span>
+                        </div>
+                        {index < steps.length - 1 && (
+                          <div className={`step-connector ${
+                            step.status === 'completed' ? 'completed' : 
+                            step.status === 'active' ? 'active' : ''
+                          }`}></div>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+            
+            // Default welcome state (both inactive)
+            return (
+              <div className="welcome-info-container">
+                <div className="welcome-content">
+                  <div className="welcome-text">
+                    <h4>Welcome to Talkify</h4>
+                    <p>Choose an action to get started</p>
+                  </div>
+      
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Div 7 - Course Recommendation Showcase */}
-        {(isQuizComplete && showcaseData) && (
+        {(isQuizComplete && showcaseData && showShowcase) && (
           <div className="explore-div div7-showcase">
             <div className="course-recommendation-card">
               {/* Header Section */}
@@ -680,10 +776,10 @@ const Explore = () => {
                   <button 
                     className="close-recommendation-btn"
                     onClick={() => {
-                      // You can add logic here to hide the recommendation
-                      console.log('Closing recommendation card');
+                      handleUtilityAction('reset');
+                      console.log('Triggering reset via close button');
                     }}
-                    title="Close recommendation"
+                    title="Reset session"
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M18.3 5.71c-.39-.39-1.02-.39-1.41 0L12 10.59 7.11 5.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"/>
@@ -792,20 +888,6 @@ const Explore = () => {
                 </button>
               </div>
 
-              {/* Progress Indicator */}
-              <div className="progress-indicator">
-                <div className="progress-step completed">
-                  <span>Assessment</span>
-                </div>
-                <div className="progress-connector"></div>
-                <div className="progress-step active">
-                  <span>Recommendation</span>
-                </div>
-                <div className="progress-connector"></div>
-                <div className="progress-step">
-                  <span>Learning</span>
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -837,60 +919,127 @@ const Explore = () => {
       {/* Voice Settings Popup */}
       {showVoiceSettings && (
         <div className="popup-overlay">
-          <div className="popup-container voice-settings">
-            <div className="popup-header">
-              <h3>🎤 Voice Settings</h3>
-              <button className="close-button" onClick={handleCloseVoiceSettings}>
-                ✕
+          <div className="popup-container voice-settings-modern">
+            <div className="voice-settings-header">
+              <div className="header-content">
+                <div className="header-icon">🎤</div>
+                <h3>Voice Settings</h3>
+              </div>
+              <button className="close-btn" onClick={handleCloseVoiceSettings}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.3 5.71c-.39-.39-1.02-.39-1.41 0L12 10.59 7.11 5.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"/>
+                </svg>
               </button>
             </div>
-            <div className="popup-content">
-              <div className="voice-option">
-                <label>Voice Type:</label>
-                <select className="voice-select">
-                  <option value="default">Default Voice</option>
-                  <option value="male">Male Voice</option>
-                  <option value="female">Female Voice</option>
-                  <option value="child">Child Voice</option>
-                </select>
+            
+            <div className="voice-settings-content">
+              {/* Voice Controls Row */}
+              <div className="settings-row voice-controls-row">
+                <div className="row-header">
+                  <h4>Controls</h4>
+                  <span className="row-subtitle">Voice functionality</span>
+                </div>
+                <div className="controls-group">
+                  <div className="control-item">
+                    <label className="toggle-switch">
+                      <input 
+                        type="checkbox" 
+                        checked={voiceSettings.isVoiceEnabled}
+                        onChange={toggleVoice}
+                      />
+                      <span className="toggle-slider"></span>
+                    </label>
+                    <span className="control-label">Voice</span>
+                  </div>
+                  
+                  <div className="control-item">
+                    <label className="toggle-switch">
+                      <input 
+                        type="checkbox" 
+                        checked={voiceSettings.autoSpeak}
+                        onChange={toggleAutoSpeak}
+                        disabled={!voiceSettings.isVoiceEnabled}
+                      />
+                      <span className="toggle-slider"></span>
+                    </label>
+                    <span className="control-label">Auto-speak</span>
+                  </div>
+                  
+                  {voiceChatService.isSpeaking() && (
+                    <div className="control-item">
+                      <button className="stop-btn" onClick={stopSpeaking}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M6 6h12v12H6z"/>
+                        </svg>
+                        Stop
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="voice-option">
-                <label>Speaking Speed:</label>
-                <input 
-                  type="range" 
-                  min="0.5" 
-                  max="2" 
-                  step="0.1" 
-                  defaultValue="1"
-                  className="speed-slider"
-                />
-                <span className="speed-value">Normal</span>
+
+              {/* Model Selection Row */}
+              <div className="settings-row model-selection-row">
+                <div className="row-header">
+                  <h4>Language Model</h4>
+                  <span className="row-subtitle">TTS engine selection</span>
+                </div>
+                <div className="selection-group">
+                  {Object.entries(availableModels).map(([modelId, modelInfo]) => (
+                    <div 
+                      key={modelId}
+                      className={`model-option ${voiceSettings.tts.model === modelId ? 'selected' : ''}`}
+                      onClick={() => handleModelChange(modelId)}
+                    >
+                      <div className="option-icon">
+                        {modelId === 'playai-tts-arabic' ? '🌍' : '🇺🇸'}
+                      </div>
+                      <div className="option-content">
+                        <span className="option-title">{modelInfo.name}</span>
+                        <span className="option-subtitle">
+                          {modelId === 'playai-tts-arabic' ? 'Multi-language support' : 'English optimized'}
+                        </span>
+                      </div>
+                      <div className="option-indicator">
+                        {voiceSettings.tts.model === modelId && (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="voice-option">
-                <label>Pitch:</label>
-                <input 
-                  type="range" 
-                  min="0.5" 
-                  max="2" 
-                  step="0.1" 
-                  defaultValue="1"
-                  className="pitch-slider"
-                />
-                <span className="pitch-value">Normal</span>
+
+              {/* Voice Selection Row */}
+              <div className="settings-row voice-selection-row">
+                <div className="row-header">
+                  <h4>Voice Character</h4>
+                  <span className="row-subtitle">Select voice persona</span>
+                </div>
+                <div className="voice-grid">
+                  {availableModels[voiceSettings.tts.model]?.voices.map((voice) => (
+                    <div 
+                      key={voice}
+                      className={`voice-option ${voiceSettings.tts.voice === voice ? 'selected' : ''}`}
+                      onClick={() => handleVoiceChange(voice)}
+                    >
+                      <div className="voice-avatar">
+                        {voice.charAt(0)}
+                      </div>
+                      <span className="voice-name">{voice.replace('-PlayAI', '')}</span>
+                      {voiceSettings.tts.voice === voice && (
+                        <div className="selected-indicator">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="voice-preview">
-                <button className="preview-button">
-                  🔊 Test Voice
-                </button>
-              </div>
-            </div>
-            <div className="popup-actions">
-              <button className="popup-button cancel" onClick={handleCloseVoiceSettings}>
-                Cancel
-              </button>
-              <button className="popup-button confirm" onClick={handleCloseVoiceSettings}>
-                Save Settings
-              </button>
             </div>
           </div>
         </div>

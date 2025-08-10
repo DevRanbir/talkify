@@ -12,6 +12,10 @@ class TextToSpeechService {
     this.currentAudio = null;
     this.initializationPromise = null;
     
+    // Voice settings
+    this.selectedModel = localStorage.getItem('tts_model') || 'playai-tts-arabic';
+    this.selectedVoice = localStorage.getItem('tts_voice') || 'Amira-PlayAI';
+    
     // API configuration with fallback
     this.primaryURL = process.env.NODE_ENV === 'production' 
       ? 'https://talkify-inproduction.up.railway.app'  // Railway production URL
@@ -127,7 +131,8 @@ class TextToSpeechService {
         await this.initialize();
       }
 
-      if (!this.isAvailable() || !text?.trim()) {
+      if (!this.isReadyToSpeak() || !text?.trim()) {
+        console.log('🔇 TTS not ready or no text provided');
         return;
       }
 
@@ -145,8 +150,8 @@ class TextToSpeechService {
 
       // Generate speech using Groq API
       const speechResponse = await this.groq.audio.speech.create({
-        model: "playai-tts-arabic",
-        voice: options.voice || "Amira-PlayAI", // Default voice
+        model: this.selectedModel,
+        voice: this.selectedVoice,
         response_format: "wav",
         input: cleanText,
         ...options
@@ -249,6 +254,70 @@ class TextToSpeechService {
       { id: 'Ruby-PlayAI', name: 'Ruby', description: 'Friendly female voice' },
       // Add more voices as they become available in Groq
     ];
+  }
+
+  /**
+   * Get available models with their voices
+   */
+  getAvailableModels() {
+    return {
+      'playai-tts': {
+        name: 'English TTS',
+        voices: [
+          'Arista-PlayAI', 'Atlas-PlayAI', 'Basil-PlayAI', 'Briggs-PlayAI',
+          'Calum-PlayAI', 'Celeste-PlayAI', 'Cheyenne-PlayAI', 'Chip-PlayAI',
+          'Cillian-PlayAI', 'Deedee-PlayAI', 'Fritz-PlayAI', 'Gail-PlayAI',
+          'Indigo-PlayAI', 'Mamaw-PlayAI', 'Mason-PlayAI', 'Mikail-PlayAI',
+          'Mitch-PlayAI', 'Quinn-PlayAI', 'Thunder-PlayAI'
+        ]
+      },
+      'playai-tts-arabic': {
+        name: 'Arabic TTS (Multi-language)',
+        voices: [
+          'Ahmad-PlayAI', 'Amira-PlayAI', 'Khalid-PlayAI', 'Nasser-PlayAI'
+        ]
+      }
+    };
+  }
+
+  /**
+   * Set the TTS model
+   */
+  setModel(model) {
+    if (this.getAvailableModels()[model]) {
+      this.selectedModel = model;
+      localStorage.setItem('tts_model', model);
+      
+      // Reset voice to first available for new model
+      const voices = this.getAvailableModels()[model].voices;
+      this.setVoice(voices[0]);
+    }
+  }
+
+  /**
+   * Set the TTS voice
+   */
+  setVoice(voice) {
+    this.selectedVoice = voice;
+    localStorage.setItem('tts_voice', voice);
+  }
+
+  /**
+   * Get current model and voice settings
+   */
+  getTTSSettings() {
+    return {
+      model: this.selectedModel,
+      voice: this.selectedVoice,
+      availableModels: this.getAvailableModels()
+    };
+  }
+
+  /**
+   * Check if the service is fully initialized and ready to speak
+   */
+  isReadyToSpeak() {
+    return this.isEnabled && this.apiKey && this.groq;
   }
 }
 

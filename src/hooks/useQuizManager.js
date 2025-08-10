@@ -177,7 +177,9 @@ export const useQuizManager = () => {
     } catch (err) {
       console.error('❌ Failed to submit answer:', err);
       // Improved error handling - check if it's a completion signal
-      if (err.message.includes('Quiz complete') || err.message.includes('Maximum number of questions')) {
+      if (err.message.includes('Quiz complete') || 
+          err.message.includes('Maximum number of questions') ||
+          err.message.includes('Please proceed to get your course recommendation')) {
         // Try to get recommendation instead of showing error
         try {
           const recommendation = await talkifyAPI.getRecommendation();

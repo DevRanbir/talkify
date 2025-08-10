@@ -35,10 +35,16 @@ class VoiceChatService {
    * Get current voice settings
    */
   getVoiceSettings() {
+    const ttsSettings = textToSpeechService.getTTSSettings();
     return {
       isVoiceEnabled: this.isVoiceEnabled,
       autoSpeak: this.autoSpeak,
-      isAvailable: textToSpeechService.isAvailable()
+      isAvailable: textToSpeechService.isAvailable(),
+      tts: ttsSettings || {
+        model: 'playai-tts-arabic',
+        voice: 'Amira-PlayAI',
+        availableModels: textToSpeechService.getAvailableModels()
+      }
     };
   }
 
@@ -79,6 +85,27 @@ class VoiceChatService {
    */
   getAvailableVoices() {
     return textToSpeechService.getAvailableVoices();
+  }
+
+  /**
+   * Set TTS model
+   */
+  setTTSModel(model) {
+    textToSpeechService.setModel(model);
+  }
+
+  /**
+   * Set TTS voice
+   */
+  setTTSVoice(voice) {
+    textToSpeechService.setVoice(voice);
+  }
+
+  /**
+   * Get available TTS models and voices
+   */
+  getAvailableModels() {
+    return textToSpeechService.getAvailableModels();
   }
 }
 

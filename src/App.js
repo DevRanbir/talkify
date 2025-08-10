@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -9,38 +9,20 @@ import Help from "./pages/Help";
 import Authors from "./pages/Authors";
 import Contact from "./pages/Contact";
 import Explore from "./pages/Explore";
+import LoaderPage from "./pages/LoaderPage";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 
 // Component to handle route changes and loading
 const AppContent = () => {
-  const { isLoading, loadingText, showLoader, hideLoader } = useTheme();
-  const location = useLocation();
-
-  useEffect(() => {
-    // Simple route change loader - only for navigation between pages
-    if (!location.pathname.includes("/explore")) {
-      showLoader("Loading page...", "route-change");
-      
-      const timer = setTimeout(() => {
-        hideLoader("route-change");
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [location.pathname, showLoader, hideLoader]);
-
-  useEffect(() => {
-    // Simple cleanup on component mount
-    return () => {
-      // Cleanup any remaining loaders on unmount
-      hideLoader("route-change");
-    };
-  }, [hideLoader]);
+  const { isLoading, loadingText } = useTheme();
 
   return (
     <div className="App">
       <Loader isVisible={isLoading} text={loadingText} />
       <Routes>
+        {/* Loader page - full screen */}
+        <Route path="/loader" element={<LoaderPage />} />
+        
         {/* Explore page routes - full screen without navbar/footer */}
         <Route path="/explore" element={<Explore />} />
         <Route path="/explore/:userName" element={<Explore />} />
@@ -82,15 +64,28 @@ const AppContent = () => {
             <Footer />
           </>
         } />
+        {/* Catch-all route - redirect to homepage */}
+        <Route path="*" element={
+          <>
+            <Navbar />
+            <main>
+              <Homepage />
+            </main>
+            <Footer />
+          </>
+        } />
       </Routes>
     </div>
   );
 };
 
 function App() {
+  // Use basename for both development and production
+  const basename = '/talkify';
+  
   return (
     <ThemeProvider>
-      <Router basename="/talkify">
+      <Router basename={basename}>
         <AppContent />
       </Router>
     </ThemeProvider>

@@ -54,9 +54,9 @@ const Authors = () => {
     },
     {
       id: 4,
-      name: "Vo ladki jiska name yad nhi",
+      name: "Tanushvi Madaan",
       role: "Product Manager & CU Integration Lead",
-      description: "Coordinates overall development and integration with CUIMS web systems. Leads our the strategic vision.",
+      description: "Coordinates overall development and integration with CUIMS web systems. Leads our the strategic vision. Works closely with stakeholders.",
       expertise: ["Coordination", "Integration", "Project Management"],
       avatar: "👩‍💼",
       linkedin: "#",

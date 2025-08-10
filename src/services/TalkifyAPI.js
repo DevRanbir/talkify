@@ -102,36 +102,87 @@ class TalkifyAPI {
         user_id: this.sessionId
       });
       
-      const response = await this.makeRequestWithFallback('/next-question', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          conversation_history: this.conversationHistory,
-          user_id: this.sessionId
-        })
-      });
+      // Make direct request to handle both success and specific error responses
+      const urls = this.lastWorkingURL 
+        ? [this.lastWorkingURL, this.lastWorkingURL === this.primaryURL ? this.fallbackURL : this.primaryURL]
+        : [this.primaryURL, this.fallbackURL];
 
-      console.log('📥 Response status:', response.status, response.statusText);
+      let lastError;
 
-      const data = await response.json();
-      
-      // Store session ID for future requests
-      if (data.session_id) {
-        this.sessionId = data.session_id;
+      for (const baseURL of urls) {
+        try {
+          console.log(`🔗 Trying request to: ${baseURL}/next-question`);
+          const response = await fetch(`${baseURL}/next-question`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              conversation_history: this.conversationHistory,
+              user_id: this.sessionId
+            }),
+            timeout: 10000
+          });
+
+          console.log('📥 Response status:', response.status, response.statusText);
+
+          if (response.ok) {
+            this.baseURL = baseURL;
+            this.lastWorkingURL = baseURL;
+            console.log(`✅ Successfully connected to: ${baseURL}`);
+            
+            const data = await response.json();
+            
+            // Store session ID for future requests
+            if (data.session_id) {
+              this.sessionId = data.session_id;
+            }
+
+            // Update current step
+            this.currentStep = data.question_number;
+
+            return {
+              question: data.question,
+              questionNumber: data.question_number,
+              totalQuestions: data.total_questions_planned,
+              sessionId: data.session_id,
+              isLastQuestion: data.question.is_final
+            };
+          } else if (response.status === 400) {
+            // Handle quiz completion response
+            try {
+              const errorData = await response.json();
+              if (errorData.detail && errorData.detail.includes('Quiz complete')) {
+                this.baseURL = baseURL;
+                this.lastWorkingURL = baseURL;
+                throw new Error('QUIZ_COMPLETE:' + errorData.detail);
+              }
+            } catch (parseError) {
+              // If it's already our special error, re-throw it
+              if (parseError.message.startsWith('QUIZ_COMPLETE:')) {
+                throw parseError;
+              }
+            }
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          } else {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+        } catch (error) {
+          console.warn(`❌ Failed to connect to ${baseURL}: ${error.message}`);
+          
+          // If this is a quiz completion error, don't try fallback servers
+          if (error.message.startsWith('QUIZ_COMPLETE:')) {
+            // Remove the prefix and throw the original message
+            const originalMessage = error.message.replace('QUIZ_COMPLETE:', '');
+            throw new Error(originalMessage);
+          }
+          
+          lastError = error;
+          continue;
+        }
       }
 
-      // Update current step
-      this.currentStep = data.question_number;
-
-      return {
-        question: data.question,
-        questionNumber: data.question_number,
-        totalQuestions: data.total_questions_planned,
-        sessionId: data.session_id,
-        isLastQuestion: data.question.is_final
-      };
+      throw new Error(`All servers failed. Last error: ${lastError.message}`);
     } catch (error) {
       console.error('Failed to get next question:', error);
       throw error;
@@ -191,7 +242,9 @@ class TalkifyAPI {
           };
         } catch (error) {
           // If backend says quiz is complete, get recommendation
-          if (error.message.includes('Quiz complete') || error.message.includes('Maximum number of questions')) {
+          if (error.message.includes('Quiz complete') || 
+              error.message.includes('Maximum number of questions') ||
+              error.message.includes('Please proceed to get your course recommendation')) {
             const recommendation = await this.getRecommendation();
             return {
               questionMessage,

@@ -6,14 +6,18 @@ export const usePageLoader = (pageName, delay = 800) => {
   const { showLoader, hideLoader } = useTheme();
 
   useEffect(() => {
-    showLoader(`Loading ${pageName}...`);
+    const loaderId = `page-${pageName}`;
+    showLoader(`Loading ${pageName}...`, loaderId);
     
     const timer = setTimeout(() => {
-      hideLoader();
+      hideLoader(loaderId);
     }, delay);
     
-    return () => clearTimeout(timer);
-  }, [showLoader, hideLoader, pageName, delay]);
+    return () => {
+      clearTimeout(timer);
+      hideLoader(loaderId);
+    };
+  }, [pageName, delay]); // Remove showLoader and hideLoader from dependencies
 };
 
 // Custom hook for handling form submissions with loader

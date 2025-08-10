@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 const ThemeContext = createContext();
 
@@ -60,7 +60,7 @@ export const ThemeProvider = ({ children }) => {
     }, 200);
   };
 
-  const showLoader = (text = "Loading...", id = "default") => {
+  const showLoader = useCallback((text = "Loading...", id = "default") => {
     // Prevent duplicate loaders with same ID
     setLoaderQueue(prev => {
       if (prev.includes(id)) return prev; // Don't add duplicate
@@ -68,9 +68,9 @@ export const ThemeProvider = ({ children }) => {
     });
     setLoadingText(text);
     setIsLoading(true);
-  };
+  }, []);
 
-  const hideLoader = (id = "default") => {
+  const hideLoader = useCallback((id = "default") => {
     setLoaderQueue(prev => {
       const updated = prev.filter(queueId => queueId !== id);
       // Only hide loader if no other loaders are queued
@@ -80,14 +80,14 @@ export const ThemeProvider = ({ children }) => {
       }
       return updated;
     });
-  };
+  }, []);
 
   // Force clear all loaders function for emergency cleanup
-  const clearAllLoaders = () => {
+  const clearAllLoaders = useCallback(() => {
     setIsLoading(false);
     setLoaderQueue([]);
     setLoadingText("Loading...");
-  };
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ 
