@@ -21,18 +21,18 @@ const Authors = () => {
   const authors = [
     {
       id: 1,
-      name: "Samardeep singh",
+      name: "Yash Sharma",
       role: "Lead Developer & AI Specialist",
       description: "Expert in machine learning and natural language processing. Responsible for the core AI algorithms and voice assistance features of Talkify.",
       expertise: ["Machine Learning", "NLP", "Python", "TensorFlow"],
       avatar: "👨‍💻",
       linkedin: "#",
-      github: "#",
+      github: "https://github.com/yash-clash",
       email: "alex.johnson@talkify.com"
     },
     {
       id: 2,
-      name: "Ranbir Khurana",
+      name: "Samardeep Singh",
       role: "Frontend Developer & UX Designer",
       description: "Passionate about creating intuitive user experiences. Designed and implemented the responsive UI and interactive 3D elements of the platform.",
       expertise: ["React", "UI/UX Design", "3D Graphics", "CSS"],
@@ -43,7 +43,7 @@ const Authors = () => {
     },
     {
       id: 3,
-      name: "Yash Sharma",
+      name: "Ranbir Khurna",
       role: "Backend Engineer & Database Architect",
       description: "Specializes in scalable backend systems and data architecture. Built the robust infrastructure that powers Talkify's recommendations engine.",
       expertise: ["Node.js", "Database Design", "API Development"],
